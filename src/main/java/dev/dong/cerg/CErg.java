@@ -19,7 +19,8 @@ public class CErg {
     public static final CErgConfig CONFIG = AutoConfig.register(CErgConfig.class, Toml4jConfigSerializer::new).getConfig();
 
     public CErg() {
-        CErgConfig.register();
+        CONFIG.register();
+
         var modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::addCreative);
@@ -32,8 +33,6 @@ public class CErg {
 
     // Register the commonSetup method for modloading
     private void commonSetup(final FMLCommonSetupEvent event) {
-        // Some common setup code
-        LOGGER.info("HELLO FROM COMMON SETUP");
     }
 
     // Register the item to a creative tab
@@ -43,6 +42,5 @@ public class CErg {
 
     public void onServerStarting(ServerStartingEvent event) {
         // Do something when the server starts
-        LOGGER.info("HELLO from server starting");
     }
 }
