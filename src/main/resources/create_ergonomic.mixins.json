@@ -1,0 +1,10 @@
+{
+  "required": false,
+  "minVersion": "0",
+  "package": "dev.dong.cerg.mixin",
+  "refmap": "create_ergonomic.refmap.json",
+  "mixins": [
+    "tools.DepotBehaviourAccessor",
+    "tools.DepotBehaviourMixin"
+  ]
+}
