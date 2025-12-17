@@ -5,8 +5,7 @@ import com.simibubi.create.content.logistics.depot.DepotBehaviour;
 import com.simibubi.create.content.logistics.depot.DepotBlock;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import dev.dong.cerg.mixin.tools.DepotBehaviourAccessor;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
+import dev.dong.cerg.util.LangUtil;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -56,15 +55,14 @@ public class PlayerInteract {
         lastSwitchDepotMergeTime = now;
         var player = event.getEntity();
 
-        if (behaviour.canMergeItems()) {
-            ((DepotBehaviourAccessor) behaviour).setAllowMerge(false);
-            world.playSound(null, pos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, .5f, .5f);
-            player.displayClientMessage(Component.literal("已关闭物品合并功能"), true);
-        } else {
-            behaviour.enableMerging();
-            world.playSound(null, pos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, .5f, .7f);
-            player.displayClientMessage(Component.literal("已启用物品合并功能").withStyle(ChatFormatting.GREEN), true);
-        }
+        if (behaviour.canMergeItems()) ((DepotBehaviourAccessor) behaviour).setAllowMerge(false);
+        else behaviour.enableMerging();
+
+        var turnOn = behaviour.canMergeItems();
+        world.playSound(null, pos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, .5f, turnOn ? .7f : .5f);
+        LangUtil.translate("message.depot_merge")
+                .add(LangUtil.enabled(turnOn))
+                .sendStatus(player);
         behaviour.blockEntity.notifyUpdate();
     }
 }
