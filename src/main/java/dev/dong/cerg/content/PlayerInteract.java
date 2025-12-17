@@ -1,68 +1,32 @@
 package dev.dong.cerg.content;
 
+import com.simibubi.create.content.decoration.encasing.CasingBlock;
 import com.simibubi.create.content.equipment.wrench.WrenchItem;
-import com.simibubi.create.content.logistics.depot.DepotBehaviour;
-import com.simibubi.create.content.logistics.depot.DepotBlock;
-import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
-import dev.dong.cerg.mixin.tools.DepotBehaviourAccessor;
-import dev.dong.cerg.util.LangUtil;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.fml.LogicalSide;
 
 /**
  * 玩家交互
  */
 public class PlayerInteract {
     /**
-     * 置物台合并切换间隔（毫秒）
-     */
-    private static final long SWITCH_DEPOT_MERGE_DELAY = 500;
-    /**
-     * 上次切换置物台合并的时间
-     */
-    private static long lastSwitchDepotMergeTime = 0;
-
-    /**
      * 监听玩家右键
      */
     public static void rightClick(PlayerInteractEvent.RightClickBlock event) {
-        if (event.getSide() == LogicalSide.CLIENT) return;
-        if (event.getEntity() == null) return;
+        Player player = event.getEntity();
+        if (event.getLevel().isClientSide || player == null) return;
+        if (player.isShiftKeyDown() || !player.mayBuild()) return;
 
-        var item = event.getItemStack().getItem();
-        if (item instanceof WrenchItem) {
-            switchDepotMerge(event);
-//        } else if (CasingBlock) {
+        ItemStack itemStack = event.getItemStack();
+        var item = itemStack.getItem();
+        if (item instanceof BlockItem blockItem) {
+            if (blockItem.getBlock() instanceof CasingBlock) {
+//                CasingHandler.chainEncase(event);
+            }
+        } else if (item instanceof WrenchItem) {
+            DepotHandler.switchDepotMerge(event);
         }
-    }
-
-    /**
-     * 切换普通置物台的合并功能
-     */
-    private static void switchDepotMerge(PlayerInteractEvent.RightClickBlock event) {
-        var now = System.currentTimeMillis();
-        if (now - lastSwitchDepotMergeTime < SWITCH_DEPOT_MERGE_DELAY) return;
-
-        var pos = event.getPos();
-        var world = event.getLevel();
-        var blockState = world.getBlockState(pos);
-        if (blockState.isAir() || !(blockState.getBlock() instanceof DepotBlock)) return;
-
-        var behaviour = BlockEntityBehaviour.get(world, pos, DepotBehaviour.TYPE);
-        if (behaviour == null) return;
-        lastSwitchDepotMergeTime = now;
-        var player = event.getEntity();
-
-        if (behaviour.canMergeItems()) ((DepotBehaviourAccessor) behaviour).setAllowMerge(false);
-        else behaviour.enableMerging();
-
-        var turnOn = behaviour.canMergeItems();
-        world.playSound(null, pos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, .5f, turnOn ? .7f : .5f);
-        LangUtil.translate("message.depot_merge")
-                .add(LangUtil.enabled(turnOn))
-                .sendStatus(player);
-        behaviour.blockEntity.notifyUpdate();
     }
 }
