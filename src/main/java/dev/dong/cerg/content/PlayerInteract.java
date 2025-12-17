@@ -4,6 +4,7 @@ import com.simibubi.create.content.decoration.encasing.CasingBlock;
 import com.simibubi.create.content.equipment.wrench.WrenchItem;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
@@ -20,13 +21,14 @@ public class PlayerInteract {
         if (player.isShiftKeyDown() || !player.mayBuild()) return;
 
         ItemStack itemStack = event.getItemStack();
-        var item = itemStack.getItem();
+        Item item = itemStack.getItem();
         if (item instanceof BlockItem blockItem) {
             if (blockItem.getBlock() instanceof CasingBlock) {
-//                CasingHandler.chainEncase(event);
+                CasingHandler.chainEncase(event);
             }
         } else if (item instanceof WrenchItem) {
             DepotHandler.switchDepotMerge(event);
         }
+        // TODO 水车材质替换
     }
 }
