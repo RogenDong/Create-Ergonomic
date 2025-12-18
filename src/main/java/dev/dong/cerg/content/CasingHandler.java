@@ -1,10 +1,12 @@
 package dev.dong.cerg.content;
 
 import com.simibubi.create.AllBlocks;
+import com.simibubi.create.AllItems;
 import com.simibubi.create.content.decoration.encasing.EncasableBlock;
 import com.simibubi.create.content.decoration.encasing.EncasedBlock;
 import com.simibubi.create.content.decoration.encasing.EncasingRegistry;
 import com.simibubi.create.content.kinetics.belt.BeltBlock;
+import com.simibubi.create.content.kinetics.belt.BeltBlockEntity;
 import com.simibubi.create.content.kinetics.belt.BeltHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
@@ -30,17 +32,15 @@ public class CasingHandler {
         BlockState originState = level.getBlockState(pos);
         Block originBlock = originState.getBlock();
         if (originBlock instanceof BeltBlock belt) {
-            isBeltDo(event, originState, belt);
+            encaseBelt(event);
             return;
         }
 
+        ItemStack heldItemStack = event.getItemStack();
+        Item heldItem = heldItemStack.getItem();
         Player player = event.getEntity();
         var ray = event.getHitVec();
         var hand = event.getHand();
-        ItemStack heldItemStack = event.getItemStack();
-        Item heldItem = heldItemStack.getItem();
-        // TODO 扳手拆机壳 Remove casing with wrench
-        boolean encaseOrNot = false;
 
         // TODO 获取相连方块 get connected block
         List<BlockPos> connected = List.of(pos.east(), pos.south(), pos.west(), pos.north());
@@ -56,12 +56,11 @@ public class CasingHandler {
                 encased.handleEncasing(workmateState, level, workmatePos, heldItemStack, player, hand, ray);
                 break;
             }
-        }
+        }// end for: connected
+
     }
 
-    private static void isBeltDo(PlayerInteractEvent.RightClickBlock event, BlockState originState, BeltBlock originBelt) {
-        // TODO 扳手拆机壳 Remove casing with wrench
-        boolean encaseOrNot = originState.getValue(BeltBlock.CASING);
+    private static void encaseBelt(PlayerInteractEvent.RightClickBlock event) {
         BlockPos originPos = event.getPos();
         Player player = event.getEntity();
         Level world = event.getLevel();
@@ -71,20 +70,42 @@ public class CasingHandler {
         boolean isBrass = AllBlocks.BRASS_CASING.is(heldItem);
         if (!isBrass && !AllBlocks.ANDESITE_CASING.is(heldItem)) return;
 
-        List<BlockPos> chain = BeltBlock.getBeltChain(world, BeltHelper.getControllerBE(world, originPos).getBlockPos());
         SoundType soundType = (isBrass ? AllBlocks.BRASS_CASING : AllBlocks.ANDESITE_CASING)
                 .getDefaultState()
                 .getSoundType(world, originPos, player);
+        List<BlockPos> chain = BeltBlock.getBeltChain(world, BeltHelper.getControllerBE(world, originPos).getBlockPos());
+        if (chain.isEmpty()) return;
 
+        world.playSound(null, originPos, soundType.getPlaceSound(), SoundSource.BLOCKS,
+                (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
         for (BlockPos p : chain) {
             BlockState s = world.getBlockState(p);
             var b = (BeltBlock) s.getBlock();
             b.withBlockEntityDo(world, p, be -> be.setCasingType(isBrass ? BRASS : ANDESITE));
             b.updateCoverProperty(world, p, s);
         }
-        world.playSound(null, originPos, soundType.getPlaceSound(), SoundSource.BLOCKS,
-                (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
-
         event.setCanceled(true);
+    }
+
+    protected static void chainDecase(PlayerInteractEvent.RightClickBlock event) {
+        BlockPos originPos = event.getPos();
+        Level world = event.getLevel();
+        BlockPos pos = event.getPos();
+        BlockState originState = world.getBlockState(pos);
+        Block originBlock = originState.getBlock();
+
+        if (originBlock instanceof BeltBlock) {
+//            if (!originState.getValue(BeltBlock.CASING)) return;
+            List<BlockPos> chain = BeltBlock.getBeltChain(world, BeltHelper.getControllerBE(world, originPos).getBlockPos());
+            for (BlockPos p : chain) {
+                BlockState s = world.getBlockState(p);
+                var b = (BeltBlock) s.getBlock();
+                b.withBlockEntityDo(world, p, be -> be.setCasingType(BeltBlockEntity.CasingType.NONE));
+            }
+            event.setCanceled(true);
+            return;
+        }
+
+        // 传动方块
     }
 }
