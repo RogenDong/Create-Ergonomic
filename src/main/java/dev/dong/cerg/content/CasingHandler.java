@@ -31,7 +31,7 @@ public class CasingHandler {
         BlockPos pos = event.getPos();
         BlockState originState = level.getBlockState(pos);
         Block originBlock = originState.getBlock();
-        if (originBlock instanceof BeltBlock belt) {
+        if (originBlock instanceof BeltBlock) {
             encaseBelt(event);
             return;
         }
@@ -93,10 +93,17 @@ public class CasingHandler {
         BlockPos pos = event.getPos();
         BlockState originState = world.getBlockState(pos);
         Block originBlock = originState.getBlock();
+        boolean isCrouching = event.getEntity().isCrouching();
 
+        // 传送带拆壳
         if (originBlock instanceof BeltBlock) {
-//            if (!originState.getValue(BeltBlock.CASING)) return;
-            List<BlockPos> chain = BeltBlock.getBeltChain(world, BeltHelper.getControllerBE(world, originPos).getBlockPos());
+            if (isCrouching) return;
+            BeltBlockEntity beltCtrl = BeltHelper.getControllerBE(world, originPos);
+            if (beltCtrl == null) return;
+
+            List<BlockPos> chain = BeltBlock.getBeltChain(world, beltCtrl.getBlockPos());
+            if (chain.isEmpty()) return;
+
             for (BlockPos p : chain) {
                 BlockState s = world.getBlockState(p);
                 var b = (BeltBlock) s.getBlock();
@@ -106,6 +113,9 @@ public class CasingHandler {
             return;
         }
 
-        // 传动方块
+        // 传动方块拆壳
+
+        if (!isCrouching) return;
+        // 获取相连方块
     }
 }

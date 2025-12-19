@@ -24,11 +24,15 @@ public class PlayerInteract {
         Player player = event.getEntity();
         Level level = event.getLevel();
         if (level.isClientSide || player == null) return;
-        if (player.isShiftKeyDown() || !player.mayBuild()) return;
+        if (!player.mayBuild()) return;
 
         ItemStack heldItemStack = event.getItemStack();
         Item heldItem = heldItemStack.getItem();
+        boolean isCrouching = player.isCrouching();
+
         if (heldItem instanceof BlockItem blockItem) {
+            if (isCrouching) return;
+            // 连锁套壳
             if (blockItem.getBlock() instanceof CasingBlock) {
                 CasingHandler.chainEncase(event);
             }
@@ -37,7 +41,10 @@ public class PlayerInteract {
             BlockState originState = level.getBlockState(pos);
             Block originBlock = originState.getBlock();
 
-            if (AllBlocks.DEPOT.is(originBlock)) DepotHandler.switchDepotMerge(event);
+            // 切换置物台合并物品开关
+            if (AllBlocks.DEPOT.is(originBlock) && !isCrouching)
+                DepotHandler.switchDepotMerge(event);
+            // 连锁拆壳
             else CasingHandler.chainDecase(event);
         }
         // TODO 水车材质替换
