@@ -1,6 +1,5 @@
 package dev.dong.cerg.content;
 
-import com.simibubi.create.AllBlocks;
 import com.simibubi.create.content.decoration.encasing.EncasableBlock;
 import com.simibubi.create.content.decoration.encasing.EncasedBlock;
 import com.simibubi.create.content.decoration.encasing.EncasingRegistry;
@@ -25,6 +24,8 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBloc
 import java.util.List;
 import java.util.function.Predicate;
 
+import static com.simibubi.create.AllBlocks.ANDESITE_CASING;
+import static com.simibubi.create.AllBlocks.BRASS_CASING;
 import static com.simibubi.create.content.kinetics.base.RotatedPillarKineticBlock.AXIS;
 import static com.simibubi.create.content.kinetics.belt.BeltBlockEntity.CasingType.ANDESITE;
 import static com.simibubi.create.content.kinetics.belt.BeltBlockEntity.CasingType.BRASS;
@@ -33,7 +34,7 @@ public class CasingHandler {
 
     public static int MAX_CHAIN = 64;
 
-    protected static void chainEncase(RightClickBlock event) {
+    public static void chainEncase(RightClickBlock event) {
         Level level = event.getLevel();
         if (level.isClientSide) return;
 
@@ -81,10 +82,10 @@ public class CasingHandler {
         ItemStack heldItemStack = event.getItemStack();
         Item heldItem = heldItemStack.getItem();
 
-        boolean isBrass = AllBlocks.BRASS_CASING.is(heldItem);
-        if (!isBrass && !AllBlocks.ANDESITE_CASING.is(heldItem)) return;
+        boolean isBrass = BRASS_CASING.is(heldItem);
+        if (!isBrass && !ANDESITE_CASING.is(heldItem)) return;
 
-        SoundType soundType = (isBrass ? AllBlocks.BRASS_CASING : AllBlocks.ANDESITE_CASING)
+        SoundType soundType = (isBrass ? BRASS_CASING : ANDESITE_CASING)
                 .getDefaultState()
                 .getSoundType(world, originPos, player);
         List<BlockPos> chain = BeltBlock.getBeltChain(world, BeltHelper.getControllerBE(world, originPos).getBlockPos());
@@ -101,7 +102,7 @@ public class CasingHandler {
         event.setCanceled(true);
     }
 
-    protected static void chainDecase(RightClickBlock event) {
+    public static void chainDecase(RightClickBlock event) {
         BlockPos originPos = event.getPos();
         BlockState originState = event.getLevel().getBlockState(originPos);
         Block originBlock = originState.getBlock();

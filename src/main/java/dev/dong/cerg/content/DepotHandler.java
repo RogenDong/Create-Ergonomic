@@ -24,7 +24,7 @@ public class DepotHandler {
     /**
      * 切换普通置物台的合并功能
      */
-    protected static void switchDepotMerge(PlayerInteractEvent.RightClickBlock event) {
+    public static void switchDepotMerge(PlayerInteractEvent.RightClickBlock event) {
         var now = System.currentTimeMillis();
         if (now - lastSwitchDepotMergeTime < SWITCH_DEPOT_MERGE_DELAY) return;
 

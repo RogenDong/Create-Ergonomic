@@ -1,8 +1,10 @@
-package dev.dong.cerg.content;
+package dev.dong.cerg.event;
 
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.content.decoration.encasing.CasingBlock;
+import dev.dong.cerg.content.CasingHandler;
+import dev.dong.cerg.content.DepotHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;

@@ -1,7 +1,7 @@
 package dev.dong.cerg;
 
 import com.mojang.logging.LogUtils;
-import dev.dong.cerg.content.PlayerInteract;
+import dev.dong.cerg.event.PlayerInteract;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer;
 import net.minecraftforge.common.MinecraftForge;
