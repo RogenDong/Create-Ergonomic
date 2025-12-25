@@ -10,7 +10,7 @@ import com.simibubi.create.content.kinetics.belt.BeltBlockEntity;
 import com.simibubi.create.content.kinetics.belt.BeltHelper;
 import dev.dong.cerg.util.S2E;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
+import net.minecraft.core.Direction.Axis;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -20,9 +20,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import static com.simibubi.create.content.kinetics.base.RotatedPillarKineticBlock.AXIS;
 import static com.simibubi.create.content.kinetics.belt.BeltBlockEntity.CasingType.ANDESITE;
@@ -32,12 +33,12 @@ public class CasingHandler {
 
     public static int MAX_CHAIN = 64;
 
-    protected static void chainEncase(PlayerInteractEvent.RightClickBlock event) {
+    protected static void chainEncase(RightClickBlock event) {
         Level level = event.getLevel();
         if (level.isClientSide) return;
 
-        BlockPos pos = event.getPos();
-        BlockState originState = level.getBlockState(pos);
+        BlockPos originPos = event.getPos();
+        BlockState originState = level.getBlockState(originPos);
         Block originBlock = originState.getBlock();
         if (originBlock instanceof BeltBlock) {
             encaseBelt(event);
@@ -45,30 +46,35 @@ public class CasingHandler {
         }
 
         ItemStack heldItemStack = event.getItemStack();
-        Item heldItem = heldItemStack.getItem();
-        Player player = event.getEntity();
-        var ray = event.getHitVec();
-        var hand = event.getHand();
-
-        // TODO 获取相连方块 get connected block
-        List<BlockPos> connected = List.of(pos.east(), pos.south(), pos.west(), pos.north());
-
-        for (BlockPos workmatePos : connected) {
-            BlockState workmateState = level.getBlockState(workmatePos);
-            Block workmate = workmateState.getBlock();
-            if (!(workmate instanceof EncasableBlock)) continue;
-
-            for (Block tmp : EncasingRegistry.getVariants(workmate)) {
-                if (!(tmp instanceof EncasedBlock encased)) continue;
-                if (encased.getCasing().asItem() != heldItem) continue;
-                encased.handleEncasing(workmateState, level, workmatePos, heldItemStack, player, hand, ray);
-                break;
-            }
-        }// end for: connected
-
+        Axis axis = originState.getValue(AXIS);
+        chain(originPos, axis, pos -> tryEncase(event, pos, axis, heldItemStack));
     }
 
-    private static void encaseBelt(PlayerInteractEvent.RightClickBlock event) {
+    private static boolean tryEncase(RightClickBlock e, BlockPos pos, Axis a, ItemStack held) {
+        Level level = e.getLevel();
+        BlockState state = level.getBlockState(pos);
+        if (state.isAir()) return false;
+
+        Block block = state.getBlock();
+        if (!(block instanceof RotatedPillarKineticBlock) || state.getValue(AXIS) != a) return false;
+
+        EncasedBlock encased = getEncasedBlock(block, held.getItem());
+        if (encased == null) return false;
+
+        encased.handleEncasing(state, level, pos, held, e.getEntity(), e.getHand(), e.getHitVec());
+        return true;
+    }
+
+    private static EncasedBlock getEncasedBlock(Block block, Item held) {
+        if (block instanceof EncasableBlock)
+            for (Block v : EncasingRegistry.getVariants(block))
+                if (v instanceof EncasedBlock encased && encased.getCasing().asItem() == held)
+                    return encased;
+
+        return null;
+    }
+
+    private static void encaseBelt(RightClickBlock event) {
         BlockPos originPos = event.getPos();
         Player player = event.getEntity();
         Level world = event.getLevel();
@@ -95,14 +101,14 @@ public class CasingHandler {
         event.setCanceled(true);
     }
 
-    protected static void chainDecase(PlayerInteractEvent.RightClickBlock event) {
+    protected static void chainDecase(RightClickBlock event) {
         BlockPos originPos = event.getPos();
-        Level world = event.getLevel();
-        BlockState originState = world.getBlockState(originPos);
+        BlockState originState = event.getLevel().getBlockState(originPos);
         Block originBlock = originState.getBlock();
 
         // 传送带拆壳
         if (originBlock instanceof BeltBlock) {
+            event.setCanceled(true);
             decaseBelt(event);
             return;
         }
@@ -114,31 +120,11 @@ public class CasingHandler {
         ((RotatedPillarKineticBlock) originBlock).onSneakWrenched(originState,
                 new UseOnContext(event.getEntity(), event.getHand(), event.getHitVec()));
 
-        var axis = originState.getValue(RotatedPillarKineticBlock.AXIS);
-        S2E ofs = new S2E(originPos);
-        S2E vec = switch (axis) {
-            case X -> S2E.axisX();
-            case Y -> S2E.axisY();
-            case Z -> S2E.axisZ();
-        };
-        boolean sFlag = true, eFlag = true;
-        int count = 1;
-
-        // 沿轴遍历，无所谓传动轴or齿轮
-        while ((sFlag || eFlag) && count < MAX_CHAIN) {
-            ofs.expand(vec);
-            if (sFlag) {
-                if (tryDecase(event, ofs.getStart(), axis)) count++;
-                else sFlag = false;
-            }
-            if (eFlag) {
-                if (tryDecase(event, ofs.getEnd(), axis)) count++;
-                else eFlag = false;
-            }
-        }
+        var axis = originState.getValue(AXIS);
+        chain(originPos, axis, pos -> tryDecase(event, pos, axis));
     }
 
-    private static boolean tryDecase(PlayerInteractEvent.RightClickBlock event, BlockPos p, Direction.Axis axis) {
+    private static boolean tryDecase(RightClickBlock event, BlockPos p, Axis axis) {
         BlockState s = event.getLevel().getBlockState(p);
         if (s.isAir()) return false;
         Block b = s.getBlock();
@@ -152,7 +138,7 @@ public class CasingHandler {
         return true;
     }
 
-    private static void decaseBelt(PlayerInteractEvent.RightClickBlock event) {
+    private static void decaseBelt(RightClickBlock event) {
         if (event.getEntity().isCrouching()) return;
         event.setCanceled(true);
         BlockPos originPos = event.getPos();
@@ -171,4 +157,27 @@ public class CasingHandler {
         }
     }
 
+    private static void chain(BlockPos p, Axis axis, Predicate<BlockPos> tryCasing) {
+        S2E ofs = new S2E(p);
+        S2E vec = switch (axis) {
+            case X -> S2E.axisX();
+            case Y -> S2E.axisY();
+            case Z -> S2E.axisZ();
+        };
+        boolean sFlag = true, eFlag = true;
+        int count = 1;
+        // 沿轴遍历，无所谓传动轴or齿轮
+        while ((sFlag || eFlag) && count < MAX_CHAIN) {
+            ofs.expand(vec);
+            if (sFlag) {
+                if (tryCasing.test(ofs.getStart())) count++;
+                else sFlag = false;
+            }
+//            if (count >= MAX_CHAIN) return;
+            if (eFlag) {
+                if (tryCasing.test(ofs.getEnd())) count++;
+                else eFlag = false;
+            }
+        }// end while
+    }
 }
