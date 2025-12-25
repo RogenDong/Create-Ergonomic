@@ -30,23 +30,26 @@ public class PlayerInteract {
         Item heldItem = heldItemStack.getItem();
         boolean isCrouching = player.isCrouching();
 
+        // 使用机壳
         if (heldItem instanceof BlockItem blockItem) {
             if (isCrouching) return;
             // 连锁套壳
             if (blockItem.getBlock() instanceof CasingBlock) {
                 CasingHandler.chainEncase(event);
             }
-        } else if (AllItems.WRENCH.is(heldItem)) {
-            BlockPos pos = event.getPos();
-            BlockState originState = level.getBlockState(pos);
-            Block originBlock = originState.getBlock();
-
-            // 切换置物台合并物品开关
-            if (AllBlocks.DEPOT.is(originBlock) && !isCrouching)
-                DepotHandler.switchDepotMerge(event);
-            // 连锁拆壳
-            else CasingHandler.chainDecase(event);
+            return;
         }
+
+        // 使用扳手
+        if (!AllItems.WRENCH.is(heldItem)) return;
+        BlockPos pos = event.getPos();
+        BlockState originState = level.getBlockState(pos);
+        Block originBlock = originState.getBlock();
+
+        // 切换置物台合并物品开关 // 连锁拆壳
+        if (AllBlocks.DEPOT.is(originBlock) && !isCrouching) DepotHandler.switchDepotMerge(event);
+        else CasingHandler.chainDecase(event);
+
         // TODO 水车材质替换
     }
 }
