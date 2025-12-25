@@ -2,13 +2,16 @@ package dev.dong.cerg;
 
 import com.mojang.logging.LogUtils;
 import dev.dong.cerg.event.PlayerInteract;
+import dev.dong.cerg.event.PlayerLogged;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 
@@ -20,19 +23,26 @@ public class CErg {
 
     public CErg() {
         CONFIG.register();
-
         var modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modEventBus.addListener(this::commonSetup);
-        modEventBus.addListener(this::addCreative);
-
         var gameEventBus = MinecraftForge.EVENT_BUS;
-        // Register ourselves for server and other game events we are interested in
-        gameEventBus.addListener(this::onServerStarting);
-        gameEventBus.addListener(PlayerInteract::rightClick);
+        modEventBus(modEventBus);
+        gameEventBus(gameEventBus);
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> onClient(modEventBus, gameEventBus));
     }
 
-    // Register the commonSetup method for modloading
-    private void commonSetup(final FMLCommonSetupEvent event) {
+    private void modEventBus(IEventBus modEventBus) {
+        modEventBus.addListener(this::addCreative);
+        CErgPackets.registerPackets();
+    }
+
+    private void gameEventBus(IEventBus gameEventBus) {
+        gameEventBus.addListener(PlayerInteract::rightClick);
+        gameEventBus.addListener(PlayerLogged::playerLoggedOut);
+    }
+
+    private static void onClient(IEventBus modEventBus, IEventBus gameEventBus) {
+        modEventBus.addListener(CErgKeys::register);
+//        gameEventBus.addListener(InputEvents::onKeyInput);
     }
 
     // Register the item to a creative tab
@@ -40,7 +50,7 @@ public class CErg {
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
     }
 
-    public void onServerStarting(ServerStartingEvent event) {
-        // Do something when the server starts
+    public static ResourceLocation asResource(String path) {
+        return new ResourceLocation(ID, path);
     }
 }
