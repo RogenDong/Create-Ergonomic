@@ -97,28 +97,13 @@ public class CasingHandler {
 
     protected static void chainDecase(PlayerInteractEvent.RightClickBlock event) {
         BlockPos originPos = event.getPos();
-        Player player = event.getEntity();
         Level world = event.getLevel();
         BlockState originState = world.getBlockState(originPos);
         Block originBlock = originState.getBlock();
-        boolean isCrouching = player.isCrouching();
 
         // 传送带拆壳
         if (originBlock instanceof BeltBlock) {
-            if (isCrouching) return;
-            BeltBlockEntity beltCtrl = BeltHelper.getControllerBE(world, originPos);
-            if (beltCtrl == null) return;
-
-            List<BlockPos> chain = BeltBlock.getBeltChain(world, beltCtrl.getBlockPos());
-            if (chain.isEmpty()) return;
-
-            for (BlockPos p : chain) {
-                BlockState s = world.getBlockState(p);
-                var b = (BeltBlock) s.getBlock();
-                b.withBlockEntityDo(world, p, be -> be.setCasingType(BeltBlockEntity.CasingType.NONE));
-            }
-
-            event.setCanceled(true);
+            decaseBelt(event);
             return;
         }
 
@@ -126,8 +111,8 @@ public class CasingHandler {
         event.setCanceled(true);
 
         // 传动方块拆壳
-        var context = new UseOnContext(player, event.getHand(), event.getHitVec());
-        ((RotatedPillarKineticBlock) originBlock).onSneakWrenched(originState, context);
+        ((RotatedPillarKineticBlock) originBlock).onSneakWrenched(originState,
+                new UseOnContext(event.getEntity(), event.getHand(), event.getHitVec()));
 
         var axis = originState.getValue(RotatedPillarKineticBlock.AXIS);
         S2E ofs = new S2E(originPos);
@@ -165,6 +150,25 @@ public class CasingHandler {
         // 只处理已包机壳的方块
         if (b instanceof EncasedBlock) w.onSneakWrenched(s, context);
         return true;
+    }
+
+    private static void decaseBelt(PlayerInteractEvent.RightClickBlock event) {
+        if (event.getEntity().isCrouching()) return;
+        event.setCanceled(true);
+        BlockPos originPos = event.getPos();
+        Level world = event.getLevel();
+
+        BeltBlockEntity beltCtrl = BeltHelper.getControllerBE(world, originPos);
+        if (beltCtrl == null) return;
+
+        List<BlockPos> chain = BeltBlock.getBeltChain(world, beltCtrl.getBlockPos());
+        if (chain.isEmpty()) return;
+
+        for (BlockPos p : chain) {
+            BlockState s = world.getBlockState(p);
+            var b = (BeltBlock) s.getBlock();
+            b.withBlockEntityDo(world, p, be -> be.setCasingType(BeltBlockEntity.CasingType.NONE));
+        }
     }
 
 }
