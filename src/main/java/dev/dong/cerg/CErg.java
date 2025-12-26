@@ -1,10 +1,12 @@
 package dev.dong.cerg;
 
 import com.mojang.logging.LogUtils;
+import dev.dong.cerg.event.InputEvents;
 import dev.dong.cerg.event.PlayerInteract;
 import dev.dong.cerg.event.PlayerLogged;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -20,6 +22,7 @@ public class CErg {
     public static final String ID = "create_ergonomic";
     public static final Logger LOGGER = LogUtils.getLogger();
     public static final CErgConfig CONFIG = AutoConfig.register(CErgConfig.class, Toml4jConfigSerializer::new).getConfig();
+    public static final Minecraft MC = Minecraft.getInstance();
 
     public CErg() {
         CONFIG.register();
@@ -38,11 +41,12 @@ public class CErg {
     private void gameEventBus(IEventBus gameEventBus) {
         gameEventBus.addListener(PlayerInteract::rightClick);
         gameEventBus.addListener(PlayerLogged::playerLoggedOut);
+//        gameEventBus.addListener(InputEvents::showKeyTipChainEncase);
     }
 
     private static void onClient(IEventBus modEventBus, IEventBus gameEventBus) {
         modEventBus.addListener(CErgKeys::register);
-//        gameEventBus.addListener(InputEvents::onKeyInput);
+        gameEventBus.addListener(InputEvents::listenerKeyChainEncase);
     }
 
     // Register the item to a creative tab

@@ -1,9 +1,8 @@
 package dev.dong.cerg.content;
 
 import com.simibubi.create.foundation.networking.SimplePacketBase;
-import dev.dong.cerg.CErgKeys;
 import dev.dong.cerg.CErg;
-import dev.dong.cerg.CErgPackets;
+import dev.dong.cerg.CErgKeys;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkEvent.Context;
@@ -19,7 +18,7 @@ public class KeyPressStatePacket extends SimplePacketBase {
     }
 
     // 自定义构造器
-    public KeyPressStatePacket(boolean isPressed, CErgKeys keybind) {
+    public KeyPressStatePacket(CErgKeys keybind, boolean isPressed) {
         this.isPressed = isPressed;
         this.keybind = keybind.ordinal();
     }
@@ -44,9 +43,5 @@ public class KeyPressStatePacket extends SimplePacketBase {
         if (key == null) return;
 
         PlayerKeyStates.setKeyState(player, key, isPressed);
-    }
-
-    public static void sendToServer(CErgKeys key, boolean pressed) {
-        CErgPackets.getChannel().sendToServer(new KeyPressStatePacket(pressed, key));
     }
 }

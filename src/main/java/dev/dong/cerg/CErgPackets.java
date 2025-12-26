@@ -35,4 +35,9 @@ public class CErgPackets {
         return channel;
     }
 
+    public static <MSG> void sendToServer(MSG packet) {
+        var c1 = CErg.MC.getConnection();
+        if (c1 != null) channel.sendToServer(packet);
+    }
+
 }
