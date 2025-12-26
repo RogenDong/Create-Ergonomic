@@ -1,6 +1,6 @@
 {
   "create_ergonomic.name": "Create: 人体工学",
-  "create_ergonomic.key.chainEncase": "连锁包壳/拆壳",
+  "create_ergonomic.key.chain_encase": "连锁包壳/拆壳",
   "create_ergonomic.message.enabled": "启用",
   "create_ergonomic.message.disabled": "禁用",
   "create_ergonomic.message.depot_merge": "置物台合并堆叠: "
