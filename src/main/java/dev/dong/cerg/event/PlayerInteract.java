@@ -32,29 +32,38 @@ public class PlayerInteract {
         if (originState.isAir()) return;
 
         Player player = event.getEntity();
-        if (player == null || !player.mayBuild() || !isKeyPressed(player, CHAIN_ENCASE)) return;
+        if (player == null || !player.mayBuild()) return;
 
-        ItemStack heldItemStack = event.getItemStack();
-        Item heldItem = heldItemStack.getItem();
-        boolean isCrouching = player.isCrouching();
+        //-----------------
+        // 不需要按键的……
+        //-----------------
 
-        // 使用机壳
-        if (heldItem instanceof BlockItem blockItem) {
-            if (isCrouching) return;
-            // 连锁套壳
-            if (blockItem.getBlock() instanceof CasingBlock) {
-                CasingHandler.chainEncase(event);
-            }
+        if (!isKeyPressed(player, CHAIN_ENCASE)) {
+            Block originBlock = originState.getBlock();
+            // 切换置物台合并物品开关
+            if (AllBlocks.DEPOT.is(originBlock) && !player.isCrouching())
+                DepotHandler.switchDepotMerge(event);
             return;
         }
 
-        // 使用扳手
-        if (!AllItems.WRENCH.is(heldItem)) return;
-        Block originBlock = originState.getBlock();
+        //-----------------
+        // 需要按住连锁键的……
+        //-----------------
 
-        // 切换置物台合并物品开关 // 连锁拆壳
-        if (AllBlocks.DEPOT.is(originBlock) && !isCrouching) DepotHandler.switchDepotMerge(event);
-        else CasingHandler.chainDecase(event);
+        ItemStack heldItemStack = event.getItemStack();
+        Item heldItem = heldItemStack.getItem();
+
+        // 连锁套壳
+        if (heldItem instanceof BlockItem bi && bi.getBlock() instanceof CasingBlock) {
+            CasingHandler.chainEncase(event);
+            return;
+        }
+
+        // 连锁拆壳
+        if (AllItems.WRENCH.is(heldItem)) {
+            CasingHandler.chainDecase(event);
+            return;
+        }
 
         // TODO 管道连锁开窗
 
