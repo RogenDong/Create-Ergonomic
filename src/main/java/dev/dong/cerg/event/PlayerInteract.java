@@ -14,6 +14,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
+import static dev.dong.cerg.CErgKeys.CHAIN_ENCASE;
+import static dev.dong.cerg.content.PlayerKeyStates.isKeyPressed;
+
 /**
  * 玩家交互
  */
@@ -29,7 +32,7 @@ public class PlayerInteract {
         if (originState.isAir()) return;
 
         Player player = event.getEntity();
-        if (player == null || !player.mayBuild()) return;
+        if (player == null || !player.mayBuild() || !isKeyPressed(player, CHAIN_ENCASE)) return;
 
         ItemStack heldItemStack = event.getItemStack();
         Item heldItem = heldItemStack.getItem();
@@ -52,6 +55,8 @@ public class PlayerInteract {
         // 切换置物台合并物品开关 // 连锁拆壳
         if (AllBlocks.DEPOT.is(originBlock) && !isCrouching) DepotHandler.switchDepotMerge(event);
         else CasingHandler.chainDecase(event);
+
+        // TODO 管道连锁开窗
 
         // TODO 水车材质替换
     }
