@@ -5,7 +5,6 @@ import com.simibubi.create.AllItems;
 import com.simibubi.create.content.decoration.encasing.CasingBlock;
 import dev.dong.cerg.content.CasingHandler;
 import dev.dong.cerg.content.DepotHandler;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -23,10 +22,14 @@ public class PlayerInteract {
      * 监听玩家右键
      */
     public static void rightClick(PlayerInteractEvent.RightClickBlock event) {
-        Player player = event.getEntity();
         Level level = event.getLevel();
-        if (level.isClientSide || player == null) return;
-        if (!player.mayBuild()) return;
+        if (level.isClientSide) return;
+
+        BlockState originState = level.getBlockState(event.getPos());
+        if (originState.isAir()) return;
+
+        Player player = event.getEntity();
+        if (player == null || !player.mayBuild()) return;
 
         ItemStack heldItemStack = event.getItemStack();
         Item heldItem = heldItemStack.getItem();
@@ -44,8 +47,6 @@ public class PlayerInteract {
 
         // 使用扳手
         if (!AllItems.WRENCH.is(heldItem)) return;
-        BlockPos pos = event.getPos();
-        BlockState originState = level.getBlockState(pos);
         Block originBlock = originState.getBlock();
 
         // 切换置物台合并物品开关 // 连锁拆壳
