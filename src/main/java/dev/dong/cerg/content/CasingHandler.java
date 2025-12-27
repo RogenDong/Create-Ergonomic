@@ -5,6 +5,7 @@ import com.simibubi.create.content.decoration.encasing.EncasedBlock;
 import com.simibubi.create.content.decoration.encasing.EncasingRegistry;
 import com.simibubi.create.content.fluids.FluidPropagator;
 import com.simibubi.create.content.fluids.FluidTransportBehaviour;
+import com.simibubi.create.content.fluids.pipes.EncasedPipeBlock;
 import com.simibubi.create.content.fluids.pipes.FluidPipeBlock;
 import com.simibubi.create.content.fluids.pipes.GlassFluidPipeBlock;
 import com.simibubi.create.content.kinetics.base.RotatedPillarKineticBlock;
@@ -136,8 +137,11 @@ public class CasingHandler {
         var hand = event.getHand();
 
         for (BlockPos pos : connected) {
-            BlockHitResult ray = hitVec.withPosition(pos);
             BlockState state = level.getBlockState(pos);
+            // 跳过已经包壳的
+            if (ENCASED_FLUID_PIPE.has(state)) continue;
+
+            BlockHitResult ray = hitVec.withPosition(pos);
             Block pipe = state.getBlock();
             // 玻璃管道
             if (pipe instanceof GlassFluidPipeBlock gfp)
@@ -156,11 +160,9 @@ public class CasingHandler {
         while (!frontier.isEmpty() && visited.size() < MAX_CHAIN) {
             BlockPos currentPos = frontier.pop();
             if (!world.isLoaded(currentPos) || visited.contains(currentPos)) continue;
+            visited.add(currentPos);
 
             BlockState currentState = world.getBlockState(currentPos);
-            // 跳过已经包壳的
-            if (!ENCASED_FLUID_PIPE.has(currentState)) visited.add(currentPos);
-
             FluidTransportBehaviour pipe = FluidPropagator.getPipe(world, currentPos);
             if (pipe == null) continue;
 
@@ -169,7 +171,10 @@ public class CasingHandler {
                 if (visited.contains(target) || !world.isLoaded(target)) continue;
 
                 BlockState state = world.getBlockState(target);
-                if (!state.isAir() && (FLUID_PIPE.has(state) || GLASS_FLUID_PIPE.has(state)))
+                if (state.isAir()) continue;
+                if (FLUID_PIPE.has(state)
+                        || GLASS_FLUID_PIPE.has(state)
+                        || ENCASED_FLUID_PIPE.has(state))
                     frontier.add(target);
             }// end for
         }// end while
@@ -177,10 +182,18 @@ public class CasingHandler {
     }
 
     public static void chainDecase(RightClickBlock event) {
+        Level level = event.getLevel();
         BlockPos originPos = event.getPos();
-        BlockState originState = event.getLevel().getBlockState(originPos);
-        Block originBlock = originState.getBlock();
+        BlockState originState = level.getBlockState(originPos);
 
+        // 管道
+        if (ENCASED_FLUID_PIPE.has(originState)) {
+            event.setCanceled(true);
+            decasePipe(event);
+            return;
+        }
+
+        Block originBlock = originState.getBlock();
         // 传送带拆壳
         if (originBlock instanceof BeltBlock) {
             event.setCanceled(true);
@@ -231,6 +244,22 @@ public class CasingHandler {
             BlockState s = world.getBlockState(p);
             var b = (BeltBlock) s.getBlock();
             b.withBlockEntityDo(world, p, be -> be.setCasingType(BeltBlockEntity.CasingType.NONE));
+        }
+    }
+
+    private static void decasePipe(RightClickBlock event) {
+        var level = event.getLevel();
+        Set<BlockPos> connected = getConnectedPipe(level, event.getPos());
+        if (connected.isEmpty()) return;
+
+        var hitVec = event.getHitVec();
+        var player = event.getEntity();
+        var hand = event.getHand();
+
+        for (BlockPos pos : connected) {
+            BlockState state = level.getBlockState(pos);
+            if (state.getBlock() instanceof EncasedPipeBlock encased)
+                encased.onWrenched(state, new UseOnContext(player, hand, hitVec.withPosition(pos)));
         }
     }
 
