@@ -1,6 +1,7 @@
 package dev.dong.cerg.mixin.tools;
 
 import com.simibubi.create.content.logistics.depot.DepotBehaviour;
+import dev.dong.cerg.CErg;
 import net.minecraft.nbt.CompoundTag;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -15,11 +16,13 @@ public abstract class DepotBehaviourMixin {
 
     @Inject(method = "write", at = @At("HEAD"))
     private void writeAllowMerge(CompoundTag compound, boolean clientPacket, CallbackInfo callbackInfo) {
-        compound.putBoolean("allowMerge", allowMerge);
+        if (CErg.CONFIG.general.enableDepotMerge)
+            compound.putBoolean("allowMerge", allowMerge);
     }
 
     @Inject(method = "read", at = @At("HEAD"))
     private void readAllowMerge(CompoundTag compound, boolean clientPacket, CallbackInfo callbackInfo) {
-        allowMerge = compound.getBoolean("allowMerge");
+        if (CErg.CONFIG.general.enableDepotMerge)
+            allowMerge = compound.getBoolean("allowMerge");
     }
 }

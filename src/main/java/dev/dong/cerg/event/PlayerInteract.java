@@ -3,6 +3,8 @@ package dev.dong.cerg.event;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.content.decoration.encasing.CasingBlock;
+import dev.dong.cerg.CErg;
+import dev.dong.cerg.CErgConfig;
 import dev.dong.cerg.content.CasingHandler;
 import dev.dong.cerg.content.DepotHandler;
 import net.minecraft.world.entity.player.Player;
@@ -41,7 +43,7 @@ public class PlayerInteract {
         if (!isKeyPressed(player, CHAIN_ENCASE)) {
             Block originBlock = originState.getBlock();
             // 切换置物台合并物品开关
-            if (AllBlocks.DEPOT.is(originBlock) && !player.isCrouching())
+            if (CErg.CONFIG.general.enableDepotMerge && AllBlocks.DEPOT.is(originBlock) && !player.isCrouching())
                 DepotHandler.switchDepotMerge(event);
             return;
         }
@@ -53,16 +55,18 @@ public class PlayerInteract {
         ItemStack heldItemStack = event.getItemStack();
         Item heldItem = heldItemStack.getItem();
 
-        // 连锁套壳
-        if (heldItem instanceof BlockItem bi && bi.getBlock() instanceof CasingBlock) {
-            CasingHandler.chainEncase(event);
-            return;
-        }
+        if (CErg.CONFIG.general.enableChainEncase) {
+            // 连锁套壳
+            if (heldItem instanceof BlockItem bi && bi.getBlock() instanceof CasingBlock) {
+                CasingHandler.chainEncase(event);
+                return;
+            }
 
-        // 连锁拆壳
-        if (AllItems.WRENCH.is(heldItem)) {
-            CasingHandler.chainDecase(event);
-            return;
+            // 连锁拆壳
+            if (AllItems.WRENCH.is(heldItem)) {
+                CasingHandler.chainDecase(event);
+                return;
+            }
         }
 
         // TODO 管道连锁开窗

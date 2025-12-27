@@ -3,5 +3,10 @@
   "create_ergonomic.key.chain_encase": "chain encase/decase",
   "create_ergonomic.message.enabled": "Enabled",
   "create_ergonomic.message.disabled": "Disabled",
-  "create_ergonomic.message.depot_merge": "Depot allow items merging: "
+  "create_ergonomic.message.depot_merge": "Depot allow items merging: ",
+  "text.autoconfig.create_ergonomic.category.general": "General Settings",
+  "text.autoconfig.create_ergonomic.option.general.enableDepotMerge": "Enable Depot merge item",
+  "text.autoconfig.create_ergonomic.option.general.enableDepotMerge.@Tooltip": "Wrench toggles the item merging of Depot",
+  "text.autoconfig.create_ergonomic.option.general.enableChainEncase": "Enable chain encase/decase",
+  "text.autoconfig.create_ergonomic.option.general.enableChainEncase.@Tooltip": "Enable chain encase/decase"
 }

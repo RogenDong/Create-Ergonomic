@@ -3,5 +3,10 @@
   "create_ergonomic.key.chain_encase": "连锁包壳/拆壳",
   "create_ergonomic.message.enabled": "启用",
   "create_ergonomic.message.disabled": "禁用",
-  "create_ergonomic.message.depot_merge": "置物台合并堆叠: "
+  "create_ergonomic.message.depot_merge": "置物台合并堆叠: ",
+  "text.autoconfig.create_ergonomic.category.general": "常规设置",
+  "text.autoconfig.create_ergonomic.option.general.enableDepotMerge": "启用置物台物品合并",
+  "text.autoconfig.create_ergonomic.option.general.enableDepotMerge.@Tooltip": "用扳手切换置物台的物品合并开关",
+  "text.autoconfig.create_ergonomic.option.general.enableChainEncase": "启用连锁套壳、拆壳",
+  "text.autoconfig.create_ergonomic.option.general.enableChainEncase.@Tooltip": "启用连锁套壳、拆壳"
 }
