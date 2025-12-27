@@ -3,12 +3,16 @@ package dev.dong.cerg.content;
 import com.simibubi.create.content.decoration.encasing.EncasableBlock;
 import com.simibubi.create.content.decoration.encasing.EncasedBlock;
 import com.simibubi.create.content.decoration.encasing.EncasingRegistry;
+import com.simibubi.create.content.fluids.FluidPropagator;
+import com.simibubi.create.content.fluids.FluidTransportBehaviour;
+import com.simibubi.create.content.fluids.pipes.GlassFluidPipeBlock;
 import com.simibubi.create.content.kinetics.base.RotatedPillarKineticBlock;
 import com.simibubi.create.content.kinetics.belt.BeltBlock;
 import com.simibubi.create.content.kinetics.belt.BeltBlockEntity;
 import com.simibubi.create.content.kinetics.belt.BeltHelper;
 import dev.dong.cerg.util.S2E;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
@@ -19,12 +23,20 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
+import static com.simibubi.create.AllBlocks.ENCASED_FLUID_PIPE;
+import static com.simibubi.create.AllBlocks.GLASS_FLUID_PIPE;
+import static com.simibubi.create.AllBlocks.FLUID_PIPE;
 import static com.simibubi.create.AllBlocks.ANDESITE_CASING;
+import static com.simibubi.create.AllBlocks.COPPER_CASING;
 import static com.simibubi.create.AllBlocks.BRASS_CASING;
 import static com.simibubi.create.content.kinetics.base.RotatedPillarKineticBlock.AXIS;
 import static com.simibubi.create.content.kinetics.belt.BeltBlockEntity.CasingType.ANDESITE;
@@ -36,16 +48,25 @@ public class CasingHandler {
 
     public static void chainEncase(RightClickBlock event) {
         Level level = event.getLevel();
-        if (level.isClientSide) return;
-
         BlockPos originPos = event.getPos();
         BlockState originState = level.getBlockState(originPos);
+
+        // 管道
+        if ((FLUID_PIPE.has(originState) || GLASS_FLUID_PIPE.has(originState))
+                && COPPER_CASING.isIn(event.getItemStack())) {
+            encasePipe(event);
+            return;
+        }
+
         Block originBlock = originState.getBlock();
+        // 传送带
         if (originBlock instanceof BeltBlock) {
             encaseBelt(event);
             return;
         }
 
+        // 传动方块
+        if (!(originBlock instanceof RotatedPillarKineticBlock)) return;
         ItemStack heldItemStack = event.getItemStack();
         Axis axis = originState.getValue(AXIS);
         chain(originPos, axis, pos -> tryEncase(event, pos, axis, heldItemStack));
@@ -100,6 +121,60 @@ public class CasingHandler {
             b.updateCoverProperty(world, p, s);
         }
         event.setCanceled(true);
+    }
+
+    private static void encasePipe(RightClickBlock event) {
+        var level = event.getLevel();
+        Set<BlockPos> connected = getConnectedPipe(level, event.getPos());
+        if (connected.isEmpty()) return;
+
+        BlockHitResult hitVec = event.getHitVec();
+        var heldItemStack = event.getItemStack();
+        var heldItem = heldItemStack.getItem();
+        var player = event.getEntity();
+        var hand = event.getHand();
+
+        for (BlockPos pos : connected) {
+            BlockState state = level.getBlockState(pos);
+            Block pipe = state.getBlock();
+            BlockHitResult ray = hitVec.withPosition(pos);
+            // 玻璃管道
+            if (pipe instanceof GlassFluidPipeBlock gp) {
+                gp.use(state, level, pos, player, hand, ray);
+                continue;
+            }
+            EncasedBlock e = getEncasedBlock(pipe, heldItem);
+            if (e != null) e.handleEncasing(state, level, pos, heldItemStack, player, hand, ray);
+        }
+    }
+
+    private static Set<BlockPos> getConnectedPipe(Level world, BlockPos pipePos) {
+        LinkedList<BlockPos> frontier = new LinkedList<>();
+        Set<BlockPos> visited = new HashSet<>();
+        frontier.add(pipePos);
+
+        // Visit all connected
+        while (!frontier.isEmpty() && visited.size() < MAX_CHAIN) {
+            BlockPos currentPos = frontier.pop();
+            if (!world.isLoaded(currentPos) || visited.contains(currentPos)) continue;
+
+            BlockState currentState = world.getBlockState(currentPos);
+            // 跳过已经包壳的
+            if (!ENCASED_FLUID_PIPE.has(currentState)) visited.add(currentPos);
+
+            FluidTransportBehaviour pipe = FluidPropagator.getPipe(world, currentPos);
+            if (pipe == null) continue;
+
+            for (Direction d : FluidPropagator.getPipeConnections(currentState, pipe)) {
+                BlockPos target = currentPos.relative(d);
+                if (visited.contains(target) || !world.isLoaded(target)) continue;
+
+                BlockState state = world.getBlockState(target);
+                if (!state.isAir() && (FLUID_PIPE.has(state) || GLASS_FLUID_PIPE.has(state)))
+                    frontier.add(target);
+            }// end for
+        }// end while
+        return visited;
     }
 
     public static void chainDecase(RightClickBlock event) {
