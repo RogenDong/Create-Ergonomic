@@ -74,6 +74,8 @@ public class CasingHandler {
 
     private static boolean tryEncase(RightClickBlock e, BlockPos pos, Axis a, ItemStack held) {
         Level level = e.getLevel();
+        if (!level.isLoaded(pos)) return false;
+
         BlockState state = level.getBlockState(pos);
         if (state.isAir()) return false;
 
@@ -189,19 +191,21 @@ public class CasingHandler {
             return;
         }
 
-        if (!(originBlock instanceof RotatedPillarKineticBlock && originBlock instanceof EncasedBlock)) return;
+        if (!(originBlock instanceof RotatedPillarKineticBlock rpk && originBlock instanceof EncasedBlock)) return;
         event.setCanceled(true);
 
         // 传动方块拆壳
-        ((RotatedPillarKineticBlock) originBlock).onSneakWrenched(originState,
-                new UseOnContext(event.getEntity(), event.getHand(), event.getHitVec()));
+        rpk.onSneakWrenched(originState, new UseOnContext(event.getEntity(), event.getHand(), event.getHitVec()));
 
         var axis = originState.getValue(AXIS);
         chain(originPos, axis, pos -> tryDecase(event, pos, axis));
     }
 
     private static boolean tryDecase(RightClickBlock event, BlockPos p, Axis axis) {
-        BlockState s = event.getLevel().getBlockState(p);
+        var level = event.getLevel();
+        if (!level.isLoaded(p)) return false;
+
+        BlockState s = level.getBlockState(p);
         if (s.isAir()) return false;
         Block b = s.getBlock();
 
