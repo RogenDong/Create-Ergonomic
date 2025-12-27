@@ -5,6 +5,7 @@ import com.simibubi.create.content.decoration.encasing.EncasedBlock;
 import com.simibubi.create.content.decoration.encasing.EncasingRegistry;
 import com.simibubi.create.content.fluids.FluidPropagator;
 import com.simibubi.create.content.fluids.FluidTransportBehaviour;
+import com.simibubi.create.content.fluids.pipes.FluidPipeBlock;
 import com.simibubi.create.content.fluids.pipes.GlassFluidPipeBlock;
 import com.simibubi.create.content.kinetics.base.RotatedPillarKineticBlock;
 import com.simibubi.create.content.kinetics.belt.BeltBlock;
@@ -130,23 +131,19 @@ public class CasingHandler {
         Set<BlockPos> connected = getConnectedPipe(level, event.getPos());
         if (connected.isEmpty()) return;
 
-        BlockHitResult hitVec = event.getHitVec();
-        var heldItemStack = event.getItemStack();
-        var heldItem = heldItemStack.getItem();
+        var hitVec = event.getHitVec();
         var player = event.getEntity();
         var hand = event.getHand();
 
         for (BlockPos pos : connected) {
+            BlockHitResult ray = hitVec.withPosition(pos);
             BlockState state = level.getBlockState(pos);
             Block pipe = state.getBlock();
-            BlockHitResult ray = hitVec.withPosition(pos);
             // 玻璃管道
-            if (pipe instanceof GlassFluidPipeBlock gp) {
-                gp.use(state, level, pos, player, hand, ray);
-                continue;
-            }
-            EncasedBlock e = getEncasedBlock(pipe, heldItem);
-            if (e != null) e.handleEncasing(state, level, pos, heldItemStack, player, hand, ray);
+            if (pipe instanceof GlassFluidPipeBlock gfp)
+                gfp.use(state, level, pos, player, hand, ray);
+            else if (pipe instanceof FluidPipeBlock fp)
+                fp.use(state, level, pos, player, hand, ray);
         }
     }
 
