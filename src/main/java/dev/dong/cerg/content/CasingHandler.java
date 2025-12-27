@@ -69,7 +69,7 @@ public class CasingHandler {
         if (!(originBlock instanceof RotatedPillarKineticBlock)) return;
         ItemStack heldItemStack = event.getItemStack();
         Axis axis = originState.getValue(AXIS);
-        chain(originPos, axis, pos -> tryEncase(event, pos, axis, heldItemStack));
+        axialConnection(originPos, axis, pos -> tryEncase(event, pos, axis, heldItemStack));
     }
 
     private static boolean tryEncase(RightClickBlock e, BlockPos pos, Axis a, ItemStack held) {
@@ -198,7 +198,7 @@ public class CasingHandler {
         rpk.onSneakWrenched(originState, new UseOnContext(event.getEntity(), event.getHand(), event.getHitVec()));
 
         var axis = originState.getValue(AXIS);
-        chain(originPos, axis, pos -> tryDecase(event, pos, axis));
+        axialConnection(originPos, axis, pos -> tryDecase(event, pos, axis));
     }
 
     private static boolean tryDecase(RightClickBlock event, BlockPos p, Axis axis) {
@@ -237,7 +237,7 @@ public class CasingHandler {
         }
     }
 
-    private static void chain(BlockPos p, Axis axis, Predicate<BlockPos> tryCasing) {
+    private static void axialConnection(BlockPos p, Axis axis, Predicate<BlockPos> tryCasing) {
         S2E ofs = new S2E(p);
         S2E vec = switch (axis) {
             case X -> S2E.axisX();
