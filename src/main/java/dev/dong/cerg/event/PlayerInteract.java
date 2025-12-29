@@ -4,7 +4,6 @@ import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.content.decoration.encasing.CasingBlock;
 import dev.dong.cerg.CErg;
-import dev.dong.cerg.CErgConfig;
 import dev.dong.cerg.content.CasingHandler;
 import dev.dong.cerg.content.DepotHandler;
 import net.minecraft.world.entity.player.Player;

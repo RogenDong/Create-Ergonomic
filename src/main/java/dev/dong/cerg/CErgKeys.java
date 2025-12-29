@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.jarjar.nio.util.Lazy;
 
 import java.util.Optional;
 
@@ -14,38 +13,41 @@ public enum CErgKeys {
      */
     CHAIN_ENCASE("chain_encase", 96);
 
-    private final Lazy<KeyMapping> keybind;
+    private final int defaultKey;
+    private final String description;
+    private KeyMapping keybind;
 
     CErgKeys(String desc, int defaultKey) {
-        this.keybind = Lazy.of(new KeyMapping(
-                CErg.ID + ".key." + desc,
-                defaultKey,
-                CErg.ID + ".name"));
+        this.defaultKey = defaultKey;
+        this.description = desc;
     }
 
     public static void register(RegisterKeyMappingsEvent event) {
-//        key.keybind = new KeyMapping(key.description, key.key, category);
-        for (var key : values()) event.register(key.keybind.get());
+        for (var key : CErgKeys.values()) {
+            key.keybind = new KeyMapping(
+                    CErg.ID + ".key." + key.description,
+                    key.defaultKey,
+                    CErg.ID + ".name");
+            event.register(key.keybind);
+        }
     }
 
     public static CErgKeys indexOf(int i) {
-        return switch (i) {
-            case 0 -> CHAIN_ENCASE;
-            default -> null;
-        };
+        CErgKeys[] keys = values();
+        if (i < 0 || i >= keys.length) return null;
+        return keys[i];
     }
 
     public static Optional<CErgKeys> getByCode(int code) {
-        for (CErgKeys k : values())
-            if (k.keybind.get().getKey().getValue() == code)
+        for (var k : values())
+            if (k.keybind.getKey().getValue() == code)
                 return Optional.of(k);
         return Optional.empty();
     }
 
     public boolean isDown() {
-        KeyMapping bind = keybind.get();
-        if (bind.getKey().equals(InputConstants.UNKNOWN)) return false;
-        return bind.isDown();
+        if (keybind.getKey().equals(InputConstants.UNKNOWN)) return false;
+        return keybind.isDown();
     }
 
     public static boolean ctrlDown() {

@@ -1,6 +1,7 @@
 package dev.dong.cerg;
 
 import dev.dong.cerg.content.KeyPressStatePacket;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkEvent.Context;
 import net.minecraftforge.network.NetworkRegistry;
@@ -36,7 +37,7 @@ public class CErgPackets {
     }
 
     public static <MSG> void sendToServer(MSG packet) {
-        var c1 = CErg.MC.getConnection();
+        var c1 = Minecraft.getInstance().getConnection();
         if (c1 != null) channel.sendToServer(packet);
     }
 
