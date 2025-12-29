@@ -5,7 +5,7 @@ plugins {
 
 base.archivesName.set(p("mod_id"))
 group = p("mod_group_id")
-version = "${p("mc_version")}-${p("mod_version")}-${p("loader_cap")}"
+version = "${p("mc_version_slim")}-${p("create_version_slim")}-${p("mod_version")}-${p("loader_cap")}"
 
 java {
     toolchain {
