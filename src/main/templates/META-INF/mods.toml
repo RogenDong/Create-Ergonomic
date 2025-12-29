@@ -8,6 +8,8 @@ version="${mod_version}"
 displayName="Create: Ergonomic"
 authors="dong"
 description='''ce'''
+logoFile = "icon.png"
+logoBlur = false
 
 [[dependencies.create_ergonomic]]
 modId = "forge"
