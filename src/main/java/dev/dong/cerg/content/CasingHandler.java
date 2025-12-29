@@ -12,6 +12,7 @@ import com.simibubi.create.content.kinetics.base.RotatedPillarKineticBlock;
 import com.simibubi.create.content.kinetics.belt.BeltBlock;
 import com.simibubi.create.content.kinetics.belt.BeltBlockEntity;
 import com.simibubi.create.content.kinetics.belt.BeltHelper;
+import dev.dong.cerg.CErg;
 import dev.dong.cerg.util.S2E;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -45,8 +46,6 @@ import static com.simibubi.create.content.kinetics.belt.BeltBlockEntity.CasingTy
 import static com.simibubi.create.content.kinetics.belt.BeltBlockEntity.CasingType.BRASS;
 
 public class CasingHandler {
-
-    public static int MAX_CHAIN = 64;
 
     public static void chainEncase(RightClickBlock event) {
         Level level = event.getLevel();
@@ -157,7 +156,7 @@ public class CasingHandler {
         frontier.add(pipePos);
 
         // Visit all connected
-        while (!frontier.isEmpty() && visited.size() < MAX_CHAIN) {
+        while (!frontier.isEmpty() && visited.size() < CErg.CONFIG.chainEncase.pipeMaxDistance) {
             BlockPos currentPos = frontier.pop();
             if (!world.isLoaded(currentPos) || visited.contains(currentPos)) continue;
             visited.add(currentPos);
@@ -273,13 +272,13 @@ public class CasingHandler {
         boolean sFlag = true, eFlag = true;
         int count = 1;
         // 沿轴遍历，无所谓传动轴or齿轮
-        while ((sFlag || eFlag) && count < MAX_CHAIN) {
+        while ((sFlag || eFlag) && count < CErg.CONFIG.chainEncase.pillarMaxDistance) {
             ofs.expand(vec);
             if (sFlag) {
                 if (tryCasing.test(ofs.getStart())) count++;
                 else sFlag = false;
             }
-//            if (count >= MAX_CHAIN) return;
+//            if (count >= CErg.CONFIG.chainEncase.pillarMaxDistance) return;
             if (eFlag) {
                 if (tryCasing.test(ofs.getEnd())) count++;
                 else eFlag = false;
