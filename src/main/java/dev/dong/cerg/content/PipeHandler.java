@@ -5,6 +5,7 @@ import com.simibubi.create.content.fluids.FluidTransportBehaviour;
 import com.simibubi.create.content.fluids.pipes.FluidPipeBlock;
 import com.simibubi.create.content.fluids.pipes.GlassFluidPipeBlock;
 import dev.dong.cerg.CErg;
+import dev.dong.cerg.CErgConfig;
 import dev.dong.cerg.util.S2E;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -14,24 +15,26 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
+import java.util.*;
 
-import static com.simibubi.create.AllBlocks.*;
+import static com.simibubi.create.AllBlocks.FLUID_PIPE;
+import static com.simibubi.create.AllBlocks.GLASS_FLUID_PIPE;
+import static com.simibubi.create.AllBlocks.ENCASED_FLUID_PIPE;
 
 /**
  * 管道处理
  */
 public class PipeHandler {
 
-    static Set<BlockPos> getConnectedPipe(Level world, BlockPos pipePos) {
+    private static final CErgConfig.ChainEncase cfg = CErg.CONFIG.chainEncase;
+
+    public static Set<BlockPos> getConnectedPipe(Level world, BlockPos pipePos) {
         LinkedList<BlockPos> frontier = new LinkedList<>();
-        Set<BlockPos> visited = new HashSet<>();
+        Set<BlockPos> visited = new HashSet<>(Math.max(64, cfg.pipeMaxDistance));
         frontier.add(pipePos);
 
         // Visit all connected
-        while (!frontier.isEmpty() && visited.size() < CErg.CONFIG.chainEncase.pipeMaxDistance) {
+        while (!frontier.isEmpty() && visited.size() < cfg.pipeMaxDistance) {
             BlockPos currentPos = frontier.pop();
             if (!world.isLoaded(currentPos) || visited.contains(currentPos)) continue;
             visited.add(currentPos);
@@ -45,49 +48,54 @@ public class PipeHandler {
                 if (visited.contains(target) || !world.isLoaded(target)) continue;
 
                 BlockState state = world.getBlockState(target);
-                if (state.isAir()) continue;
-                if (isAxialPipe(state) || ENCASED_FLUID_PIPE.has(state))
-                    frontier.add(target);
+                if (state.isAir() || ENCASED_FLUID_PIPE.has(state)) continue;
+                if (GLASS_FLUID_PIPE.has(state) || FLUID_PIPE.has(state)) frontier.add(target);
             }// end for
         }// end while
         return visited;
     }
 
     public static boolean isAxialPipe(BlockState s) {
-        return FLUID_PIPE.has(s) || GLASS_FLUID_PIPE.has(s);
+        return GLASS_FLUID_PIPE.has(s) || (
+                FLUID_PIPE.has(s) && FluidPropagator.getStraightPipeAxis(s) != null);
     }
 
-    static Set<BlockPos> getAxialConnectedPipe(Level world, BlockPos p) {
+    private static boolean testConnection(Level world, Axis axis, List<BlockPos> axialPipes, Direction dir, BlockPos pos) {
+        var bs = world.getBlockState(pos);
+        FluidTransportBehaviour pipe = FluidPropagator.getPipe(world, pos);
+        if (pipe == null) return false;
+
+        if (!ENCASED_FLUID_PIPE.has(bs) && FluidPropagator.getStraightPipeAxis(bs) == axis) {
+            axialPipes.add(pos);
+            return true;
+        }
+
+        // 遇到[非轴向管道 or 套壳管道]: 若沿指定方向连接, 则跳过节点继续遍历; 反之则停止
+        return pipe.canHaveFlowToward(bs, dir);
+    }
+
+    public static List<BlockPos> getAxialConnectedPipe(Level world, BlockPos p) {
         var os = world.getBlockState(p);
         if (os.isAir()) return null;
 
-        Axis axis = FluidPropagator.getStraightPipeAxis(os);
+        var axis = FluidPropagator.getStraightPipeAxis(os);
         if (axis == null) return null;
 
         S2E ofs = new S2E(p);
         S2E vec = S2E.getVec(axis);
+        var dir = vec.getDirection();
         boolean sFlag = true, eFlag = true;
-        HashSet<BlockPos> connected = new HashSet<>();
+        List<BlockPos> axialPipes = new ArrayList<>(Math.max(64, cfg.pillarMaxDistance));
 
-        // 沿轴遍历，无所谓传动轴or齿轮
-        while ((sFlag || eFlag) && connected.size() < CErg.CONFIG.chainEncase.pipeMaxDistance) {
+        // 遍历直通管道（因为沿轴向遍历，所以套用轴向连锁限制）
+        while ((sFlag || eFlag) && axialPipes.size() < cfg.pillarMaxDistance) {
             ofs.expand(vec);
-            if (sFlag) {
-                var bs = world.getBlockState(ofs.getStart());
-                if (isAxialPipe(bs) && FluidPropagator.getStraightPipeAxis(bs) == axis)
-                    connected.add(ofs.getStart());
-                else sFlag = false;
-            }
-//            if (count >= CErg.CONFIG.chainEncase.pipeMaxDistance) return;
-            if (eFlag) {
-                var bs = world.getBlockState(ofs.getEnd());
-                if (isAxialPipe(bs) && FluidPropagator.getStraightPipeAxis(bs) == axis)
-                    connected.add(ofs.getEnd());
-                else eFlag = false;
-            }
+            if (sFlag) sFlag = testConnection(world, axis, axialPipes, dir.getFirst(), ofs.getStart());
+            if (axialPipes.size() >= cfg.pillarMaxDistance) break;
+            if (eFlag) eFlag = testConnection(world, axis, axialPipes, dir.getSecond(), ofs.getEnd());
         }
 
-        return connected;
+        return axialPipes;
     }
 
     /**
@@ -95,11 +103,13 @@ public class PipeHandler {
      */
     public static void chainTogglePipe(RightClickBlock event) {
         var level = event.getLevel();
-        var originState = level.getBlockState(event.getPos());
+        var originPos = event.getPos();
+        var originState = level.getBlockState(originPos);
         boolean toGlass = FLUID_PIPE.has(originState);
-        if (!toGlass && !GLASS_FLUID_PIPE.has(originState)) return;
+        if (toGlass && FluidPropagator.getStraightPipeAxis(originState) == null) return;
+//        if (!toGlass && !GLASS_FLUID_PIPE.has(originState)) return;
 
-        Set<BlockPos> connected = getAxialConnectedPipe(level, event.getPos());
+        List<BlockPos> connected = getAxialConnectedPipe(level, originPos);
         if (connected == null || connected.isEmpty()) return;
 
         var hand = event.getHand();
@@ -108,10 +118,9 @@ public class PipeHandler {
 
         for (BlockPos pos : connected) {
             var state = level.getBlockState(pos);
-            var block = state.getBlock();
-            if (toGlass && block instanceof FluidPipeBlock regularPipe)
+            if (toGlass && state.getBlock() instanceof FluidPipeBlock regularPipe)
                 regularPipe.onWrenched(state, new UseOnContext(player, hand, ray.withPosition(pos)));
-            else if (!toGlass && block instanceof GlassFluidPipeBlock glassPipe)
+            else if (!toGlass && state.getBlock() instanceof GlassFluidPipeBlock glassPipe)
                 glassPipe.onWrenched(state, new UseOnContext(player, hand, ray.withPosition(pos)));
 //            else continue;
         }

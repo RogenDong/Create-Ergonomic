@@ -56,10 +56,11 @@ public class PlayerInteract {
         Item heldItem = heldItemStack.getItem();
 
         // 管道连锁开窗
-        if (CErg.CONFIG.general.enableChainTogglePipes
-                && AllItems.WRENCH.is(heldItem) && PipeHandler.isAxialPipe(originState)) {
-            PipeHandler.chainTogglePipe(event);
-            return;
+        if (CErg.CONFIG.general.enableChainTogglePipes) {
+            if (AllItems.WRENCH.is(heldItem) && PipeHandler.isAxialPipe(originState)) {
+                PipeHandler.chainTogglePipe(event);
+                return;
+            }
         }
 
         if (CErg.CONFIG.general.enableChainEncase) {
