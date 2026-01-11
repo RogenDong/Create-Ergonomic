@@ -47,9 +47,9 @@ public class PipeHandler {
                 BlockPos target = currentPos.relative(d);
                 if (visited.contains(target) || !world.isLoaded(target)) continue;
 
-                BlockState state = world.getBlockState(target);
-                if (state.isAir() || ENCASED_FLUID_PIPE.has(state)) continue;
-                if (GLASS_FLUID_PIPE.has(state) || FLUID_PIPE.has(state)) frontier.add(target);
+                var s = world.getBlockState(target);
+                if (FLUID_PIPE.has(s) || GLASS_FLUID_PIPE.has(s) || ENCASED_FLUID_PIPE.has(s))
+                    frontier.add(target);
             }// end for
         }// end while
         return visited;
