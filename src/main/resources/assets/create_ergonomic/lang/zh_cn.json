@@ -5,15 +5,15 @@
   "create_ergonomic.message.disabled": "禁用",
   "create_ergonomic.message.depot_merge": "置物台合并堆叠: ",
   "text.autoconfig.create_ergonomic.category.general": "常规设置",
-  "text.autoconfig.create_ergonomic.category.chainEncase": "连锁套/拆壳",
+  "text.autoconfig.create_ergonomic.category.finiteChain": "连锁套/拆壳",
   "text.autoconfig.create_ergonomic.option.general.enableDepotMerge": "启用置物台物品合并",
   "text.autoconfig.create_ergonomic.option.general.enableDepotMerge.@Tooltip": "用扳手切换置物台的物品合并开关",
   "text.autoconfig.create_ergonomic.option.general.enableChainEncase": "启用连锁套壳、拆壳",
   "text.autoconfig.create_ergonomic.option.general.enableChainEncase.@Tooltip": "启用连锁套壳、拆壳",
   "text.autoconfig.create_ergonomic.option.general.enableChainTogglePipes": "启用管道连锁开窗",
   "text.autoconfig.create_ergonomic.option.general.enableChainTogglePipes.@Tooltip": "用扳手切换管道与玻璃管道",
-  "text.autoconfig.create_ergonomic.option.chainEncase.pillarMaxDistance": "最长连锁（轴）",
-  "text.autoconfig.create_ergonomic.option.chainEncase.pillarMaxDistance.@Tooltip": "沿轴向连锁的最远距离（太多会卡）",
-  "text.autoconfig.create_ergonomic.option.chainEncase.pipeMaxDistance": "最多连锁（管道）",
-  "text.autoconfig.create_ergonomic.option.chainEncase.pipeMaxDistance.@Tooltip": "最多能连锁多少节管道（太多会卡）"
+  "text.autoconfig.create_ergonomic.option.finiteChain.axialDistance": "最长连锁（轴）",
+  "text.autoconfig.create_ergonomic.option.finiteChain.axialDistance.@Tooltip": "沿轴向连锁的最远距离（太多会卡）",
+  "text.autoconfig.create_ergonomic.option.finiteChain.pipeMaxDistance": "最多连锁（管道）",
+  "text.autoconfig.create_ergonomic.option.finiteChain.pipeMaxDistance.@Tooltip": "最多能连锁多少节管道（太多会卡）"
 }

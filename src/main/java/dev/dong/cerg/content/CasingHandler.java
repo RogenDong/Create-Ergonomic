@@ -229,21 +229,21 @@ public class CasingHandler {
     }
 
     private static void axialConnection(BlockPos p, Axis axis, Predicate<BlockPos> tryCasing) {
-        CErgConfig.ChainEncase cfg = CErg.CONFIG.chainEncase;
+        CErgConfig.FiniteChain cfg = CErg.CONFIG.finiteChain;
 
         S2E ofs = new S2E(p);
         S2E vec = S2E.getVec(axis);
         boolean sFlag = true, eFlag = true;
         int count = 1;
         // 沿轴遍历，无所谓传动轴or齿轮
-        while ((sFlag || eFlag) && count < cfg.pillarMaxDistance) {
+        while ((sFlag || eFlag) && count < cfg.axialDistance) {
             ofs.expand(vec);
             if (sFlag) {
                 if (tryCasing.test(ofs.getStart())) count++;
                 else sFlag = false;
             }
 
-            if (count >= cfg.pillarMaxDistance) return;
+            if (count >= cfg.axialDistance) return;
 
             if (eFlag) {
                 if (tryCasing.test(ofs.getEnd())) count++;

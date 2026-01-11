@@ -22,11 +22,11 @@ public class CErgConfig implements ConfigData {
     public final General general = new General();
 
     /**
-     * 连锁套壳/拆壳设置
+     * 设置连锁范围
      */
-    @Category("chainEncase")
+    @Category("finiteChain")
     @TransitiveObject
-    public final ChainEncase chainEncase = new ChainEncase();
+    public final FiniteChain finiteChain = new FiniteChain();
 
     public void register() {
         if (FMLEnvironment.dist != Dist.CLIENT) return;
@@ -52,13 +52,13 @@ public class CErgConfig implements ConfigData {
         public boolean enableChainTogglePipes = true;
     }
 
-    public static class ChainEncase {
+    public static class FiniteChain {
         /**
          * 轴向连锁上限
          */
         @Tooltip
         @BoundedDiscrete(min = 8, max = 128)
-        public int pillarMaxDistance = 64;
+        public int axialDistance = 64;
 
         /**
          * 管道连锁上限

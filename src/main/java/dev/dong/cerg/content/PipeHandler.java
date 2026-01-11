@@ -26,7 +26,7 @@ import static com.simibubi.create.AllBlocks.ENCASED_FLUID_PIPE;
  */
 public class PipeHandler {
 
-    private static final CErgConfig.ChainEncase cfg = CErg.CONFIG.chainEncase;
+    private static final CErgConfig.FiniteChain cfg = CErg.CONFIG.finiteChain;
 
     public static Set<BlockPos> getConnectedPipe(Level world, BlockPos pipePos) {
         LinkedList<BlockPos> frontier = new LinkedList<>();
@@ -85,13 +85,13 @@ public class PipeHandler {
         S2E vec = S2E.getVec(axis);
         var dir = vec.getDirection();
         boolean sFlag = true, eFlag = true;
-        List<BlockPos> axialPipes = new ArrayList<>(Math.max(64, cfg.pillarMaxDistance));
+        List<BlockPos> axialPipes = new ArrayList<>(Math.max(64, cfg.axialDistance));
 
         // 遍历直通管道（因为沿轴向遍历，所以套用轴向连锁限制）
-        while ((sFlag || eFlag) && axialPipes.size() < cfg.pillarMaxDistance) {
+        while ((sFlag || eFlag) && axialPipes.size() < cfg.axialDistance) {
             ofs.expand(vec);
             if (sFlag) sFlag = testConnection(world, axis, axialPipes, dir.getFirst(), ofs.getStart());
-            if (axialPipes.size() >= cfg.pillarMaxDistance) break;
+            if (axialPipes.size() >= cfg.axialDistance) break;
             if (eFlag) eFlag = testConnection(world, axis, axialPipes, dir.getSecond(), ofs.getEnd());
         }
 

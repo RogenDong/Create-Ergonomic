@@ -5,15 +5,15 @@
   "create_ergonomic.message.disabled": "Disabled",
   "create_ergonomic.message.depot_merge": "Depot allow items merging: ",
   "text.autoconfig.create_ergonomic.category.general": "General Settings",
-  "text.autoconfig.create_ergonomic.category.chainEncase": "Chain (En/De)case",
+  "text.autoconfig.create_ergonomic.category.finiteChain": "Finite Chain",
   "text.autoconfig.create_ergonomic.option.general.enableDepotMerge": "Enable Depot merge item",
   "text.autoconfig.create_ergonomic.option.general.enableDepotMerge.@Tooltip": "Wrench toggles the item merging of Depot",
   "text.autoconfig.create_ergonomic.option.general.enableChainEncase": "Enable chain encase/decase",
   "text.autoconfig.create_ergonomic.option.general.enableChainEncase.@Tooltip": "Enable chain encase/decase",
   "text.autoconfig.create_ergonomic.option.general.enableChainTogglePipes": "Enable chain toggle pipes",
   "text.autoconfig.create_ergonomic.option.general.enableChainTogglePipes.@Tooltip": "Wrench toggles between pipe and glass-pipe",
-  "text.autoconfig.create_ergonomic.option.chainEncase.pillarMaxDistance": "Max chain for pillar",
-  "text.autoconfig.create_ergonomic.option.chainEncase.pillarMaxDistance.@Tooltip": "Maximum chain distance for shaft/cogwheel",
-  "text.autoconfig.create_ergonomic.option.chainEncase.pipeMaxDistance": "Max chain for pipe",
-  "text.autoconfig.create_ergonomic.option.chainEncase.pipeMaxDistance.@Tooltip": "Maximum chain distance for pipe"
+  "text.autoconfig.create_ergonomic.option.finiteChain.axialDistance": "Max axial range",
+  "text.autoconfig.create_ergonomic.option.finiteChain.axialDistance.@Tooltip": "Maximum chain distance for shaft,cogwheel,...",
+  "text.autoconfig.create_ergonomic.option.finiteChain.pipeMaxDistance": "Max chain for pipe",
+  "text.autoconfig.create_ergonomic.option.finiteChain.pipeMaxDistance.@Tooltip": "Maximum chain length of the pipe"
 }
