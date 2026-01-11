@@ -1,6 +1,7 @@
 package dev.dong.cerg.util;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction.Axis;
 
 /**
  * start to end
@@ -43,5 +44,13 @@ public class S2E {
 
     public BlockPos getEnd() {
         return new BlockPos(this.a[3], this.a[4], this.a[5]);
+    }
+
+    public static S2E getVec(Axis axis) {
+        return switch (axis) {
+            case X -> S2E.axisX();
+            case Y -> S2E.axisY();
+            case Z -> S2E.axisZ();
+        };
     }
 }

@@ -128,7 +128,7 @@ public class CasingHandler {
 
     private static void encasePipe(RightClickBlock event) {
         var level = event.getLevel();
-        Set<BlockPos> connected = getConnectedPipe(level, event.getPos());
+        Set<BlockPos> connected = PipeHandler.getConnectedPipe(level, event.getPos());
         if (connected.isEmpty()) return;
 
         var hitVec = event.getHitVec();
@@ -148,36 +148,6 @@ public class CasingHandler {
             else if (pipe instanceof FluidPipeBlock fp)
                 fp.use(state, level, pos, player, hand, ray);
         }
-    }
-
-    private static Set<BlockPos> getConnectedPipe(Level world, BlockPos pipePos) {
-        LinkedList<BlockPos> frontier = new LinkedList<>();
-        Set<BlockPos> visited = new HashSet<>();
-        frontier.add(pipePos);
-
-        // Visit all connected
-        while (!frontier.isEmpty() && visited.size() < CErg.CONFIG.chainEncase.pipeMaxDistance) {
-            BlockPos currentPos = frontier.pop();
-            if (!world.isLoaded(currentPos) || visited.contains(currentPos)) continue;
-            visited.add(currentPos);
-
-            BlockState currentState = world.getBlockState(currentPos);
-            FluidTransportBehaviour pipe = FluidPropagator.getPipe(world, currentPos);
-            if (pipe == null) continue;
-
-            for (Direction d : FluidPropagator.getPipeConnections(currentState, pipe)) {
-                BlockPos target = currentPos.relative(d);
-                if (visited.contains(target) || !world.isLoaded(target)) continue;
-
-                BlockState state = world.getBlockState(target);
-                if (state.isAir()) continue;
-                if (FLUID_PIPE.has(state)
-                        || GLASS_FLUID_PIPE.has(state)
-                        || ENCASED_FLUID_PIPE.has(state))
-                    frontier.add(target);
-            }// end for
-        }// end while
-        return visited;
     }
 
     public static void chainDecase(RightClickBlock event) {
@@ -248,7 +218,7 @@ public class CasingHandler {
 
     private static void decasePipe(RightClickBlock event) {
         var level = event.getLevel();
-        Set<BlockPos> connected = getConnectedPipe(level, event.getPos());
+        Set<BlockPos> connected = PipeHandler.getConnectedPipe(level, event.getPos());
         if (connected.isEmpty()) return;
 
         var hitVec = event.getHitVec();
@@ -264,11 +234,7 @@ public class CasingHandler {
 
     private static void axialConnection(BlockPos p, Axis axis, Predicate<BlockPos> tryCasing) {
         S2E ofs = new S2E(p);
-        S2E vec = switch (axis) {
-            case X -> S2E.axisX();
-            case Y -> S2E.axisY();
-            case Z -> S2E.axisZ();
-        };
+        S2E vec = S2E.getVec(axis);
         boolean sFlag = true, eFlag = true;
         int count = 1;
         // 沿轴遍历，无所谓传动轴or齿轮
