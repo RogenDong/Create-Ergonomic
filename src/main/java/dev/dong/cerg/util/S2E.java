@@ -1,6 +1,8 @@
 package dev.dong.cerg.util;
 
+import com.simibubi.create.foundation.utility.Pair;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 
 /**
@@ -46,11 +48,26 @@ public class S2E {
         return new BlockPos(this.a[3], this.a[4], this.a[5]);
     }
 
+    public Pair<Direction, Direction> getDirection() {
+        if (this.a[0] > 0) return Pair.of(Direction.EAST, Direction.WEST);
+        if (this.a[1] > 0) return Pair.of(Direction.UP, Direction.DOWN);
+        if (this.a[2] > 0) return Pair.of(Direction.SOUTH, Direction.NORTH);
+        return null;
+    }
+
     public static S2E getVec(Axis axis) {
         return switch (axis) {
             case X -> S2E.axisX();
             case Y -> S2E.axisY();
             case Z -> S2E.axisZ();
+        };
+    }
+
+    public static Pair<Direction, Direction> getDirection(Axis axis) {
+        return switch (axis) {
+            case X -> Pair.of(Direction.EAST, Direction.SOUTH);
+            case Y -> Pair.of(Direction.UP, Direction.NORTH);
+            case Z -> Pair.of(Direction.SOUTH, Direction.NORTH);
         };
     }
 }
