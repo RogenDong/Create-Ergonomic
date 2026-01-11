@@ -2,7 +2,7 @@
 
 ## 概述 / Overview
 
-> **Create: 人体工学** 是[Create](https://github.com/Creators-of-Create/Create)模组的附属，旨在优化那些轻量但重复+枯燥的人工操作。
+> **Create: 实用功能** 是[Create](https://github.com/Creators-of-Create/Create)模组的附属，旨在优化那些轻量但重复+枯燥的人工操作。
 
 > **Create: Ergonomic** is an addon for the **[Create](https://github.com/Creators-of-Create/Create)** mod, designed to optimize those lightweight yet repetitive and tedious manual operations.
 
