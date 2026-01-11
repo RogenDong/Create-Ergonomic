@@ -6,6 +6,7 @@ import com.simibubi.create.content.decoration.encasing.CasingBlock;
 import dev.dong.cerg.CErg;
 import dev.dong.cerg.content.CasingHandler;
 import dev.dong.cerg.content.DepotHandler;
+import dev.dong.cerg.content.PipeHandler;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -54,6 +55,13 @@ public class PlayerInteract {
         ItemStack heldItemStack = event.getItemStack();
         Item heldItem = heldItemStack.getItem();
 
+        // 管道连锁开窗
+        if (CErg.CONFIG.general.enableChainTogglePipes
+                && AllItems.WRENCH.is(heldItem) && PipeHandler.isAxialPipe(originState)) {
+            PipeHandler.chainTogglePipe(event);
+            return;
+        }
+
         if (CErg.CONFIG.general.enableChainEncase) {
             // 连锁套壳
             if (heldItem instanceof BlockItem bi && bi.getBlock() instanceof CasingBlock) {
@@ -67,8 +75,6 @@ public class PlayerInteract {
                 return;
             }
         }
-
-        // TODO 管道连锁开窗
 
         // TODO 水车材质替换
     }

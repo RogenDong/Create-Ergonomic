@@ -45,6 +45,11 @@ public class CErgConfig implements ConfigData {
          */
         @Tooltip
         public boolean enableChainEncase = true;
+        /**
+         * 允许连锁切换管道or玻璃管道
+         */
+        @Tooltip
+        public boolean enableChainTogglePipes = true;
     }
 
     public static class ChainEncase {
