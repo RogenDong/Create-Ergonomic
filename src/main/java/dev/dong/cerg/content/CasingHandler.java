@@ -3,8 +3,6 @@ package dev.dong.cerg.content;
 import com.simibubi.create.content.decoration.encasing.EncasableBlock;
 import com.simibubi.create.content.decoration.encasing.EncasedBlock;
 import com.simibubi.create.content.decoration.encasing.EncasingRegistry;
-import com.simibubi.create.content.fluids.FluidPropagator;
-import com.simibubi.create.content.fluids.FluidTransportBehaviour;
 import com.simibubi.create.content.fluids.pipes.EncasedPipeBlock;
 import com.simibubi.create.content.fluids.pipes.FluidPipeBlock;
 import com.simibubi.create.content.fluids.pipes.GlassFluidPipeBlock;
@@ -13,9 +11,9 @@ import com.simibubi.create.content.kinetics.belt.BeltBlock;
 import com.simibubi.create.content.kinetics.belt.BeltBlockEntity;
 import com.simibubi.create.content.kinetics.belt.BeltHelper;
 import dev.dong.cerg.CErg;
+import dev.dong.cerg.CErgConfig;
 import dev.dong.cerg.util.S2E;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
@@ -29,8 +27,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -233,18 +229,22 @@ public class CasingHandler {
     }
 
     private static void axialConnection(BlockPos p, Axis axis, Predicate<BlockPos> tryCasing) {
+        CErgConfig.ChainEncase cfg = CErg.CONFIG.chainEncase;
+
         S2E ofs = new S2E(p);
         S2E vec = S2E.getVec(axis);
         boolean sFlag = true, eFlag = true;
         int count = 1;
         // 沿轴遍历，无所谓传动轴or齿轮
-        while ((sFlag || eFlag) && count < CErg.CONFIG.chainEncase.pillarMaxDistance) {
+        while ((sFlag || eFlag) && count < cfg.pillarMaxDistance) {
             ofs.expand(vec);
             if (sFlag) {
                 if (tryCasing.test(ofs.getStart())) count++;
                 else sFlag = false;
             }
-//            if (count >= CErg.CONFIG.chainEncase.pillarMaxDistance) return;
+
+            if (count >= cfg.pillarMaxDistance) return;
+
             if (eFlag) {
                 if (tryCasing.test(ofs.getEnd())) count++;
                 else eFlag = false;
