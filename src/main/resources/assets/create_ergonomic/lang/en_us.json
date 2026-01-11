@@ -10,6 +10,8 @@
   "text.autoconfig.create_ergonomic.option.general.enableDepotMerge.@Tooltip": "Wrench toggles the item merging of Depot",
   "text.autoconfig.create_ergonomic.option.general.enableChainEncase": "Enable chain encase/decase",
   "text.autoconfig.create_ergonomic.option.general.enableChainEncase.@Tooltip": "Enable chain encase/decase",
+  "text.autoconfig.create_ergonomic.option.general.enableChainTogglePipes": "Enable chain toggle pipes",
+  "text.autoconfig.create_ergonomic.option.general.enableChainTogglePipes.@Tooltip": "Wrench toggles between pipe and glass-pipe",
   "text.autoconfig.create_ergonomic.option.chainEncase.pillarMaxDistance": "Max chain for pillar",
   "text.autoconfig.create_ergonomic.option.chainEncase.pillarMaxDistance.@Tooltip": "Maximum chain distance for shaft/cogwheel",
   "text.autoconfig.create_ergonomic.option.chainEncase.pipeMaxDistance": "Max chain for pipe",

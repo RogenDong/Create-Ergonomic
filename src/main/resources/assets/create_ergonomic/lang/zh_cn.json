@@ -10,6 +10,8 @@
   "text.autoconfig.create_ergonomic.option.general.enableDepotMerge.@Tooltip": "用扳手切换置物台的物品合并开关",
   "text.autoconfig.create_ergonomic.option.general.enableChainEncase": "启用连锁套壳、拆壳",
   "text.autoconfig.create_ergonomic.option.general.enableChainEncase.@Tooltip": "启用连锁套壳、拆壳",
+  "text.autoconfig.create_ergonomic.option.general.enableChainTogglePipes": "启用管道连锁开窗",
+  "text.autoconfig.create_ergonomic.option.general.enableChainTogglePipes.@Tooltip": "用扳手切换管道与玻璃管道",
   "text.autoconfig.create_ergonomic.option.chainEncase.pillarMaxDistance": "最长连锁（轴）",
   "text.autoconfig.create_ergonomic.option.chainEncase.pillarMaxDistance.@Tooltip": "沿轴向连锁的最远距离（太多会卡）",
   "text.autoconfig.create_ergonomic.option.chainEncase.pipeMaxDistance": "最多连锁（管道）",
