@@ -15,7 +15,7 @@
 |:--------|:--:|:-------------------|
 | 置物台物品合并 | ✅  | 允许开/关置物台合并物品堆叠功能   |
 | 连锁套壳/拆壳 | ✅  | 传动轴、齿轮、管道连锁安装/拆除机壳 |
-| 管道连锁开窗  | ❌  | 连锁切换管道或玻璃管道        |
+| 管道连锁开窗  | ✅  | 连锁切换管道或玻璃管道        |
 | 切换管道开口  | ❌  | 空手调整管道向一面连通/切断     |
 | 批量粘贴    | ❌  | TODO               |
 
@@ -28,7 +28,7 @@
 |:-------------------------|:----:|:-----------------------------------------------------|
 | Depot Item Merging       |  ✅   | Toggle item stack merging function on depot          |
 | Batch En/Decase          |  ✅   | Batch en/decase for shafts, cogwheel pipes           |
-| Batch Pipe Windowing     |  ❌   | Batch toggle between regular pipes and glass pipes   |
+| Batch Pipe Windowing     |  ✅   | Batch toggle between regular pipes and glass pipes   |
 | Pipe Connection Toggling |  ❌   | Adjust one side pipe (dis)connection with empty hand |
 | Batch Pasting            |  ❌   | TODO                                                 |
 

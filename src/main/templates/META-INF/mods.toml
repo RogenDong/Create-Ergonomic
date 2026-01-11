@@ -7,7 +7,7 @@ modId="create_ergonomic"
 version="${mod_version}"
 displayName="Create: Ergonomic"
 authors="dong"
-description='''ce'''
+description='''An addon that optimizes tedious manual operations in Create'''
 logoFile = "icon.png"
 logoBlur = false
 
