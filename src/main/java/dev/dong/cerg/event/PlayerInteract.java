@@ -36,6 +36,8 @@ public class PlayerInteract {
         Player player = event.getEntity();
         if (player == null || !player.mayBuild()) return;
 
+        ItemStack heldItemStack = event.getItemStack();
+
         //-----------------
         // 不需要按键的……
         //-----------------
@@ -43,8 +45,12 @@ public class PlayerInteract {
         if (!isKeyPressed(player, CHAIN_ENCASE)) {
             Block originBlock = originState.getBlock();
             // 切换置物台合并物品开关
-            if (CErg.CONFIG.general.enableDepotMerge && AllBlocks.DEPOT.is(originBlock) && !player.isCrouching())
-                DepotHandler.switchDepotMerge(event);
+            if (CErg.CONFIG.general.enableDepotMerge) {
+                if(AllItems.WRENCH.isIn(heldItemStack) && AllBlocks.DEPOT.is(originBlock) && !player.isCrouching()) {
+                    DepotHandler.switchDepotMerge(event);
+                    return;
+                }
+            }
             return;
         }
 
@@ -52,7 +58,6 @@ public class PlayerInteract {
         // 需要按住连锁键的……
         //-----------------
 
-        ItemStack heldItemStack = event.getItemStack();
         Item heldItem = heldItemStack.getItem();
 
         // 管道连锁开窗
