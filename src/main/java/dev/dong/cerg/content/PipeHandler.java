@@ -20,6 +20,7 @@ import java.util.*;
 import static com.simibubi.create.AllBlocks.FLUID_PIPE;
 import static com.simibubi.create.AllBlocks.GLASS_FLUID_PIPE;
 import static com.simibubi.create.AllBlocks.ENCASED_FLUID_PIPE;
+import static net.minecraft.world.level.block.PipeBlock.PROPERTY_BY_DIRECTION;
 
 /**
  * 管道处理
@@ -124,5 +125,21 @@ public class PipeHandler {
                 glassPipe.onWrenched(state, new UseOnContext(player, hand, ray.withPosition(pos)));
 //            else continue;
         }
+    }
+
+    public static void togglePipeConnection(RightClickBlock event) {
+        var level = event.getLevel();
+        var player = event.getEntity();
+
+        var clickFace = event.getFace();
+        if (clickFace == null) return;
+
+        var originPos = event.getPos();
+        var originState = level.getBlockState(originPos);
+        var targetFace = player.isShiftKeyDown() ? clickFace.getOpposite() : clickFace;
+        var pre = originState.getValue(PROPERTY_BY_DIRECTION.get(targetFace));
+
+        level.setBlockAndUpdate(originPos,
+                originState.setValue(PROPERTY_BY_DIRECTION.get(targetFace), !pre));
     }
 }

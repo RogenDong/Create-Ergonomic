@@ -1,12 +1,14 @@
 package dev.dong.cerg.event;
 
 import com.simibubi.create.AllBlocks;
-import com.simibubi.create.AllItems;
 import com.simibubi.create.content.decoration.encasing.CasingBlock;
 import dev.dong.cerg.CErg;
 import dev.dong.cerg.content.CasingHandler;
 import dev.dong.cerg.content.DepotHandler;
 import dev.dong.cerg.content.PipeHandler;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -18,6 +20,10 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
 import static dev.dong.cerg.CErgKeys.CHAIN_ENCASE;
 import static dev.dong.cerg.content.PlayerKeyStates.isKeyPressed;
+import static net.minecraft.world.level.block.PipeBlock.PROPERTY_BY_DIRECTION;
+import static com.simibubi.create.AllItems.WRENCH;
+import static com.simibubi.create.AllBlocks.FLUID_PIPE;
+import static com.simibubi.create.AllBlocks.ENCASED_FLUID_PIPE;
 
 /**
  * 玩家交互
@@ -25,6 +31,10 @@ import static dev.dong.cerg.content.PlayerKeyStates.isKeyPressed;
 public class PlayerInteract {
     /**
      * 监听玩家右键
+     * <ul>
+     *   <li>客户端、服务端各触发一次</li>
+     *   <li>左右手各触发一次</li>
+     * </ul>
      */
     public static void rightClick(PlayerInteractEvent.RightClickBlock event) {
         Level level = event.getLevel();
@@ -43,10 +53,17 @@ public class PlayerInteract {
         //-----------------
 
         if (!isKeyPressed(player, CHAIN_ENCASE)) {
+            // 右手空空
+            if (heldItemStack.isEmpty()
+                    && event.getHand() == InteractionHand.MAIN_HAND
+                    && (FLUID_PIPE.has(originState) || ENCASED_FLUID_PIPE.has(originState))) {
+                PipeHandler.togglePipeConnection(event);
+                return;
+            }
             Block originBlock = originState.getBlock();
             // 切换置物台合并物品开关
             if (CErg.CONFIG.general.enableDepotMerge) {
-                if(AllItems.WRENCH.isIn(heldItemStack) && AllBlocks.DEPOT.is(originBlock) && !player.isCrouching()) {
+                if (WRENCH.isIn(heldItemStack) && AllBlocks.DEPOT.is(originBlock) && !player.isCrouching()) {
                     DepotHandler.switchDepotMerge(event);
                     return;
                 }
@@ -62,7 +79,7 @@ public class PlayerInteract {
 
         // 管道连锁开窗
         if (CErg.CONFIG.general.enableChainTogglePipes) {
-            if (AllItems.WRENCH.is(heldItem) && PipeHandler.isAxialPipe(originState)) {
+            if (WRENCH.is(heldItem) && PipeHandler.isAxialPipe(originState)) {
                 PipeHandler.chainTogglePipe(event);
                 return;
             }
@@ -76,7 +93,7 @@ public class PlayerInteract {
             }
 
             // 连锁拆壳
-            if (AllItems.WRENCH.is(heldItem)) {
+            if (WRENCH.is(heldItem)) {
                 CasingHandler.chainDecase(event);
                 return;
             }
