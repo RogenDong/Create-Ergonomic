@@ -15,9 +15,15 @@ public class InputEvents {
 
         KeyMapping key = event.getKeyMapping();
 
-        if (key == mc.options.keyUse || key == mc.options.keyAttack) {
-            if (CErgKeys.CHAIN_ENCASE.isDown() && CErgClient.CLIPBOARD_HANDLER.onMouseInput())
-                event.setCanceled(true);
+        boolean isUse = key == mc.options.keyUse;
+        if (isUse || key == mc.options.keyAttack) {
+            if (CErgKeys.CHAIN_ENCASE.isDown()) {
+                if (CErgClient.CLIPBOARD_HANDLER.onMouseInput())
+                    event.setCanceled(true);
+            } else if (mc.player.isShiftKeyDown() && isUse) {
+//                if (CErgClient.CLIPBOARD_HANDLER.sneakClickWhenSelecting())
+//                    event.setCanceled(true);
+            }
         }
     }
 }
