@@ -140,8 +140,16 @@ public class PipeHandler {
         var targetFace = player.isShiftKeyDown() ? clickFace.getOpposite() : clickFace;
         var pre = originState.getValue(PROPERTY_BY_DIRECTION.get(targetFace));
 
-        // 动画和音效
+        // 手部动画
         player.swing(event.getHand(), true);
+
+        // 最少保留2个面
+        long countOpenFace = Direction.stream()
+                .filter(f -> originState.getValue(PROPERTY_BY_DIRECTION.get(f)))
+                .count();
+        if (countOpenFace < 3 && pre) return;
+
+        // 音效
         var soundType = originState.getSoundType(level, originPos, player);
         level.playSound(null, originPos, soundType.getPlaceSound(), SoundSource.BLOCKS,
                 (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
