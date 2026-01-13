@@ -21,8 +21,8 @@ public class InputEvents {
                 if (CErgClient.CLIPBOARD_HANDLER.onMouseInput())
                     event.setCanceled(true);
             } else if (mc.player.isShiftKeyDown() && isUse) {
-//                if (CErgClient.CLIPBOARD_HANDLER.sneakClickWhenSelecting())
-//                    event.setCanceled(true);
+                if (CErgClient.CLIPBOARD_HANDLER.sneakClickWhenSelecting())
+                    event.setCanceled(true);
             }
         }
     }
