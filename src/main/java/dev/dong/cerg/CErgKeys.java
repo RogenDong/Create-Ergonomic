@@ -13,11 +13,13 @@ public enum CErgKeys {
      */
     CHAIN_ENCASE("chain_encase", 96);
 
+    private final String name;
     private final int defaultKey;
     private final String description;
     private KeyMapping keybind;
 
     CErgKeys(String desc, int defaultKey) {
+        this.name = CErg.ID + ".key." + desc;
         this.defaultKey = defaultKey;
         this.description = desc;
     }
@@ -48,6 +50,10 @@ public enum CErgKeys {
     public boolean isDown() {
         if (keybind.getKey().equals(InputConstants.UNKNOWN)) return false;
         return keybind.isDown();
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     public static boolean ctrlDown() {
