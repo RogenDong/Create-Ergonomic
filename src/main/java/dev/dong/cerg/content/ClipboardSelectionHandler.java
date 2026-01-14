@@ -4,18 +4,14 @@ import com.google.common.base.Objects;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.AllSpecialTextures;
 import com.simibubi.create.CreateClient;
-import com.simibubi.create.content.equipment.clipboard.ClipboardCloneable;
-import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.utility.Components;
-import com.simibubi.create.foundation.utility.Iterate;
 import dev.dong.cerg.CErg;
 import dev.dong.cerg.CErgKeys;
+import dev.dong.cerg.CErgPackets;
 import dev.dong.cerg.util.LangUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -78,7 +74,7 @@ public class ClipboardSelectionHandler {
         }
 
         // 限制选区范围
-        if (firstPos != null && !firstPos.closerThan(hovered, 24)) {
+        if (firstPos != null && !firstPos.closerThan(hovered, 21.5)) {
             LangUtil.translate("clipboard_selection.too_far")
                     .color(FAIL)
                     .sendStatus(player);
@@ -167,7 +163,7 @@ public class ClipboardSelectionHandler {
         var mc = Minecraft.getInstance();
         var player = mc.player;
         var currentSelectionBox = getCurrentSelectionBox();
-        int countCCB = countCCBsWithSelection(currentSelectionBox);
+        int countCCB = countCCBsWithSelection(firstPos, hoveredPos);
         CErg.LOGGER.info("count clipboard-cloneable block: {}", countCCB);
 
         CreateClient.OUTLINER.showAABB(clusterOutlineSlot, currentSelectionBox)
@@ -179,9 +175,8 @@ public class ClipboardSelectionHandler {
         AllSoundEvents.CLIPBOARD_ERASE.playAt(mc.level, hoveredPos, 0.5F, 0.95F, false);
         mc.level.playSound(player, hoveredPos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.75f, 1);
 
-        if (countCCB > 0) {
-            // TODO sendToServer(firstPos, hoveredPos)
-        }
+        if (countCCB > 0) CErgPackets.sendToServer(
+                new ClipboardBatchPastePacket(player.getInventory().selected, firstPos, hoveredPos));
 
         discard();
         LangUtil.translate("clipboard_selection.success", countCCB)
@@ -189,47 +184,33 @@ public class ClipboardSelectionHandler {
         clusterCooldown = 40;
     }
 
-    // ClipboardCloneable Blocks
-    public static int countCCBsWithSelection(AABB aabb) {
-        if (aabb == null) return 0;
+    private static int countCCBsWithSelection(BlockPos firstPos, BlockPos secondPos) {
+        if (firstPos == null || secondPos == null) return 0;
 
         var mc = Minecraft.getInstance();
         var copied = mc.player.getMainHandItem().getTagElement("CopiedValues");
         if (copied == null) return 0;
 
-        var level = mc.level;
+        var minX = Math.min(firstPos.getX(), secondPos.getX());
+        var minY = Math.min(firstPos.getY(), secondPos.getY());
+        var minZ = Math.min(firstPos.getZ(), secondPos.getZ());
+        var maxX = Math.max(firstPos.getX(), secondPos.getX());
+        var maxY = Math.max(firstPos.getY(), secondPos.getY());
+        var maxZ = Math.max(firstPos.getZ(), secondPos.getZ());
         int count = 0;
 
-        for (int y = (int) aabb.minY; y < aabb.maxY; y++) {
-            for (int x = (int) aabb.minX; x < aabb.maxX; x++) {
-                for (int z = (int) aabb.minZ; z < aabb.maxZ; z++) {
+        for (int y = minY; y <= maxY; y++) {
+            for (int x = minX; x <= maxX; x++) {
+                for (int z = minZ; z <= maxZ; z++) {
                     var offset = new BlockPos(x, y, z);
-                    var state = level.getBlockState(offset);
-                    if (!state.isAir() && canPaste(offset, copied)) count++;
+                    var state = mc.level.getBlockState(offset);
+                    if (!state.isAir() && ClipboardSelectionHelper.tryPaste(
+                            mc.level, mc.player, offset, copied, true))
+                        count++;
                 }
             }
         }
         return count;
-    }
-
-    public static boolean canPaste(BlockPos pos, CompoundTag copied) {
-        var mc = Minecraft.getInstance();
-        if (!(mc.level.getBlockEntity(pos) instanceof SmartBlockEntity smartBE)) return false;
-
-        for (var b : smartBE.getAllBehaviours())
-            if (b instanceof ClipboardCloneable cc && testPaste(cc, copied))
-                return true;
-
-        return smartBE instanceof ClipboardCloneable cc && testPaste(cc, copied);
-    }
-
-    private static boolean testPaste(ClipboardCloneable cc, CompoundTag copied) {
-        var player = Minecraft.getInstance().player;
-        var ct = copied.getCompound(cc.getClipboardKey());
-        for (Direction face : Iterate.directions)
-            if (cc.readFromClipboard(ct, player, face, true))
-                return true;
-        return false;
     }
 
 }
