@@ -8,6 +8,7 @@ import com.simibubi.create.content.equipment.clipboard.ClipboardCloneable;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.utility.Components;
 import com.simibubi.create.foundation.utility.Iterate;
+import dev.dong.cerg.CErg;
 import dev.dong.cerg.CErgKeys;
 import dev.dong.cerg.util.LangUtil;
 import net.minecraft.client.Minecraft;
@@ -53,10 +54,17 @@ public class ClipboardSelectionHandler {
 
         // 淡出高亮选区
         if (clusterCooldown > 0) {
-            if (clusterCooldown == 15)
+            if (clusterCooldown == 25)
                 player.displayClientMessage(Components.immutableEmpty(), true);
             CreateClient.OUTLINER.keep(clusterOutlineSlot);
             clusterCooldown--;
+        }
+
+        // 剪贴板需要保持复制的配置
+        var copied = player.getMainHandItem().getTagElement("CopiedValues");
+        if (firstPos != null && copied == null) {
+            discard();
+            return;
         }
 
         // 获取瞄准方块位置
@@ -86,7 +94,9 @@ public class ClipboardSelectionHandler {
                         ? "clipboard_selection.click_to_discard"
                         : "clipboard_selection.click_to_confirm";
 
-                LangUtil.translate(key, Component.keybind(CErgKeys.CHAIN_ENCASE.getName()))
+                LangUtil.translate(key,
+                                Component.keybind(CErgKeys.CHAIN_ENCASE.getName()),
+                                Component.keybind("key.attack"))
                         .color(color)
                         .sendStatus(player);
             }
@@ -110,42 +120,39 @@ public class ClipboardSelectionHandler {
                 : new AABB(firstPos, hoveredPos).expandTowards(1, 1, 1);
     }
 
-    public boolean onMouseInput() {
+    public void onMouseInput(boolean isAtk) {
         var mc = Minecraft.getInstance();
         var player = mc.player;
         var level = mc.level;
 
-        if (!player.mayBuild()) return false;
-        if (!CLIPBOARD.isIn(player.getMainHandItem())) return false;
-        var copied = player.getMainHandItem().getTagElement("CopiedValues");
-        if (copied == null) {
+        if (!player.mayBuild()) return;
+        if (!CLIPBOARD.isIn(player.getMainHandItem())) return;
+        if (player.getMainHandItem().getTagElement("CopiedValues") == null) {
             LangUtil.translate("clipboard_selection.have_not_copied")
                     .color(HIGHLIGHT)
                     .sendStatus(player);
-            return true;
+            return;
         }
 
-        if (player.isShiftKeyDown()) {
+        if (hoveredPos == null) return;
+
+        // 左键
+        if (isAtk) {
             if (firstPos != null) {
-                discard();
-                return true;
+                // 取消选择
+                if (player.isShiftKeyDown()) discard();
+                    // 确认选区第二点
+                else confirm();
             }
-            return false;
+            return;
         }
 
-        if (hoveredPos == null) return false;
-
-        if (firstPos != null) {
-            confirm();
-            return true;
-        }
-
+        // 确认选区第一点（右键）
         firstPos = hoveredPos;
         LangUtil.translate("clipboard_selection.first_pos")
                 .sendStatus(player);
         AllSoundEvents.CLIPBOARD_CHECKMARK.playAt(level, firstPos, 0.5F, 0.85F, false);
         level.playSound(player, firstPos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.75f, 1);
-        return true;
     }
 
     public void discard() {
@@ -159,31 +166,33 @@ public class ClipboardSelectionHandler {
     public void confirm() {
         var mc = Minecraft.getInstance();
         var player = mc.player;
+        var currentSelectionBox = getCurrentSelectionBox();
+        int countCCB = countCCBsWithSelection(currentSelectionBox);
+        CErg.LOGGER.info("count clipboard-cloneable block: {}", countCCB);
 
-        // The settings have been applied to all Cloneable blocks within the selected area.
-//        AllPackets.getChannel().sendToServer(null);// TODO packet(firstPos, hoveredPos)
+        CreateClient.OUTLINER.showAABB(clusterOutlineSlot, currentSelectionBox)
+                .colored(0xB5F2C6)
+                .withFaceTextures(AllSpecialTextures.CUTOUT_CHECKERED, AllSpecialTextures.HIGHLIGHT_CHECKERED)
+                .disableLineNormals()
+                .lineWidth(1 / 24f);
+
         AllSoundEvents.CLIPBOARD_ERASE.playAt(mc.level, hoveredPos, 0.5F, 0.95F, false);
         mc.level.playSound(player, hoveredPos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.75f, 1);
 
-        var currentSelectionBox = getCurrentSelectionBox();
-        if (currentSelectionBox != null) {
-            CreateClient.OUTLINER.showAABB(clusterOutlineSlot, currentSelectionBox)
-                    .colored(0xB5F2C6)
-                    .withFaceTextures(AllSpecialTextures.CUTOUT_CHECKERED, AllSpecialTextures.HIGHLIGHT_CHECKERED)
-                    .disableLineNormals()
-                    .lineWidth(1 / 24f);
-            LangUtil.text("可粘贴方块数量: " + countCCBsWithSelection(currentSelectionBox))
-                    .sendChat(mc.player);
+        if (countCCB > 0) {
+            // TODO sendToServer(firstPos, hoveredPos)
         }
 
         discard();
-        LangUtil.translate("clipboard_selection.success")
-                .sendStatus(player);
-        clusterCooldown = 30;
+        LangUtil.translate("clipboard_selection.success", countCCB)
+                .sendChat(player);
+        clusterCooldown = 40;
     }
 
     // ClipboardCloneable Blocks
     public static int countCCBsWithSelection(AABB aabb) {
+        if (aabb == null) return 0;
+
         var mc = Minecraft.getInstance();
         var copied = mc.player.getMainHandItem().getTagElement("CopiedValues");
         if (copied == null) return 0;
@@ -223,12 +232,4 @@ public class ClipboardSelectionHandler {
         return false;
     }
 
-    /**
-     * 选区操作过程中，没按住连锁按键，
-     * 若此时发起潜伏右键，则取消事件
-     */
-    public boolean sneakClickWhenSelecting() {
-        var stack = Minecraft.getInstance().player.getMainHandItem();
-        return !stack.isEmpty() && CLIPBOARD.isIn(stack);
-    }
 }
