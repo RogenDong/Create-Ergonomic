@@ -17,7 +17,7 @@
 | 连锁套壳/拆壳 | ✅  | 传动轴、齿轮、管道连锁安装/拆除机壳 |
 | 管道连锁开窗  | ✅  | 连锁切换管道或玻璃管道        |
 | 切换管道开口  | ✅  | 空手调整管道向一面连通/切断     |
-| 批量粘贴    | ❌  | TODO               |
+| 批量粘贴    | ✅  | 连锁键+右键开始选区，左键确认选区  |
 
 </details>
 
@@ -30,8 +30,7 @@
 | Batch En/Decase          |  ✅   | Batch en/decase for shafts, cogwheel pipes           |
 | Batch Pipe Windowing     |  ✅   | Batch toggle between regular pipes and glass pipes   |
 | Pipe Connection Toggling |  ✅   | Adjust one side pipe (dis)connection with empty hand |
-| Batch Pasting            |  ❌   | TODO                                                 |
-
+| Batch Pasting            |  ✅   | Chain key + RMB to select area, LMB to confirm.      |
 </details>
 
 ## 开发者 Developers
