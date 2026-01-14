@@ -1,5 +1,6 @@
 package dev.dong.cerg;
 
+import dev.dong.cerg.content.ClipboardBatchPastePacket;
 import dev.dong.cerg.content.KeyPressStatePacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -22,9 +23,19 @@ public class CErgPackets {
                 .networkProtocolVersion(() -> NETWORK_VERSION_STR)
                 .simpleChannel();
 
+        // packets
+
         channel.messageBuilder(KeyPressStatePacket.class, 0, PLAY_TO_SERVER)
                 .encoder(KeyPressStatePacket::write)
                 .decoder(KeyPressStatePacket::new)
+                .consumerNetworkThread((packet, contextSupplier) -> {
+                    Context context = contextSupplier.get();
+                    if (packet.handle(context)) context.setPacketHandled(true);
+                })
+                .add();
+        channel.messageBuilder(ClipboardBatchPastePacket.class, 1, PLAY_TO_SERVER)
+                .encoder(ClipboardBatchPastePacket::write)
+                .decoder(ClipboardBatchPastePacket::new)
                 .consumerNetworkThread((packet, contextSupplier) -> {
                     Context context = contextSupplier.get();
                     if (packet.handle(context)) context.setPacketHandled(true);
