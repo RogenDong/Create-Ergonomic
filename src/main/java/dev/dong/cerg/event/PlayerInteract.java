@@ -3,11 +3,12 @@ package dev.dong.cerg.event;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.content.decoration.encasing.CasingBlock;
 import dev.dong.cerg.CErg;
+import dev.dong.cerg.CErgClient;
+import dev.dong.cerg.CErgKeys;
 import dev.dong.cerg.content.CasingHandler;
 import dev.dong.cerg.content.DepotHandler;
 import dev.dong.cerg.content.PipeHandler;
-import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -16,12 +17,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
 import static dev.dong.cerg.CErgKeys.CHAIN_ENCASE;
 import static dev.dong.cerg.content.PlayerKeyStates.isKeyPressed;
-import static net.minecraft.world.level.block.PipeBlock.PROPERTY_BY_DIRECTION;
 import static com.simibubi.create.AllItems.WRENCH;
+import static com.simibubi.create.AllBlocks.CLIPBOARD;
 import static com.simibubi.create.AllBlocks.FLUID_PIPE;
 import static com.simibubi.create.AllBlocks.ENCASED_FLUID_PIPE;
 
@@ -29,6 +31,26 @@ import static com.simibubi.create.AllBlocks.ENCASED_FLUID_PIPE;
  * 玩家交互
  */
 public class PlayerInteract {
+
+    /**
+     * 鼠标交互（客户端）
+     */
+    public static void onClientClickInput(InputEvent.InteractionKeyMappingTriggered event) {
+        var mc = Minecraft.getInstance();
+        if (mc.screen != null) return;
+
+        var key = event.getKeyMapping();
+
+        boolean isAtk = key == mc.options.keyAttack;
+        if ((isAtk || key == mc.options.keyUse)
+                && CErgKeys.CHAIN_ENCASE.isDown()
+                && event.getHand() == InteractionHand.MAIN_HAND
+                && CLIPBOARD.isIn(mc.player.getMainHandItem())) {
+            event.setCanceled(true);
+            CErgClient.CLIPBOARD_HANDLER.onMouseInput(isAtk);
+        }
+    }
+
     /**
      * 监听玩家右键
      * <ul>

@@ -2,7 +2,6 @@ package dev.dong.cerg;
 
 import com.mojang.logging.LogUtils;
 import dev.dong.cerg.event.ClientEvents;
-import dev.dong.cerg.event.InputEvents;
 import dev.dong.cerg.event.PlayerInteract;
 import dev.dong.cerg.event.PlayerLogged;
 import me.shedaniel.autoconfig.AutoConfig;
@@ -44,8 +43,7 @@ public class CErg {
 
     private static void onClient(IEventBus modEventBus, IEventBus gameEventBus) {
         modEventBus.addListener(CErgKeys::register);
-//        gameEventBus.addListener(InputEvents::listenerKeyChainEncase);
-        gameEventBus.addListener(InputEvents::onClickInput);
+        gameEventBus.addListener(PlayerInteract::onClientClickInput);
         gameEventBus.addListener(ClientEvents::onTick);
     }
 

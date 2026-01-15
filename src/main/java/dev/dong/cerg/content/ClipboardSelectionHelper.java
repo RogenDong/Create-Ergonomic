@@ -61,9 +61,8 @@ public class ClipboardSelectionHelper {
                 for (int z = minZ; z <= maxZ; z++) {
                     var offset = new BlockPos(x, y, z);
                     var state = level.getBlockState(offset);
-                    if (!state.isAir())
-                        if (tryPaste(level, player, offset, copied, false))
-                            list.add(offset);
+                    if (!state.isAir() && tryPaste(level, player, offset, copied, false))
+                        list.add(offset);
                 }
             }
         }
