@@ -61,7 +61,7 @@ dependencies {
     modImplementation("com.tterrag.registrate:Registrate:${p("registrate_version")}")
     modImplementation("me.shedaniel.cloth:cloth-config-${p("loader")}:${p("cloth_cfg_version")}")
 //    modImplementation("mezz.jei:jei-${p("mc_version")}-${p("loader")}:${p("jei_version")}")
-    modImplementation("maven.modrinth:jade:${p("jade_version")}")
+//    modImplementation("maven.modrinth:jade:${p("jade_version")}")
     annotationProcessor("org.spongepowered:mixin:${p("mixin_version")}:processor")
     annotationProcessor("io.github.llamalad7:mixinextras-common:${p("mixin_extras_version")}")
     compileOnly("io.github.llamalad7:mixinextras-common:${p("mixin_extras_version")}")
