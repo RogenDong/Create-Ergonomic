@@ -47,7 +47,7 @@ legacyForge {
 repositories {
     mavenLocal()
     mavenCentral()
-    maven("https://modmaven.dev") // Create, Flywheel
+    maven("https://maven.createmod.net") // Create, Ponder, Flywheel
     maven("https://maven.tterrag.com") // Registrate
     maven("https://maven.shedaniel.me") // Cloth Config API
 //    maven("https://maven.blamejared.com") // JEI
@@ -56,8 +56,9 @@ repositories {
 
 // 依赖配置
 dependencies {
-    modImplementation("com.simibubi.create:create-${p("mc_version")}:${p("create_version")}:slim")
-    modImplementation("com.jozufozu.flywheel:flywheel-${p("loader")}-${p("mc_version")}:${p("flywheel_version")}")
+    modImplementation("com.simibubi.create:create-${p("mc_version")}:${p("create_version")}:slim") { isTransitive = false }
+    modImplementation("net.createmod.ponder:Ponder-${p("loader_cap")}-${p("mc_version")}:${p("ponder_version")}")
+    modImplementation("dev.engine-room.flywheel:flywheel-${p("loader")}-${p("mc_version")}:${p("flywheel_version")}")
     modImplementation("com.tterrag.registrate:Registrate:${p("registrate_version")}")
     modImplementation("me.shedaniel.cloth:cloth-config-${p("loader")}:${p("cloth_cfg_version")}")
 //    modImplementation("mezz.jei:jei-${p("mc_version")}-${p("loader")}:${p("jei_version")}")
@@ -72,8 +73,8 @@ publishMods {
     file.set(tasks.named("reobfJar").get().outputs.files.singleFile)
     changelog.set(file("CHANGELOG.md").readText())
     type.set(BETA)
-    version.set(p("mod_version"))
-    displayName.set("${p("mc_version_slim")}-${p("create_version_slim")}-${p("mod_version")}")
+    version.set("${p("mc_version_slim")}-${p("mod_version")}-${p("loader_cap")}")
+    displayName.set("${p("mod_version")} for ${p("mc_version")} Create ${p("create_version_slim")} [${p("loader_cap")}]")
     modLoaders.addAll(p("loader_cap"))
     modrinth {
         accessToken.set(providers.environmentVariable("MODRINTH_TOKEN_PUBLISH"))

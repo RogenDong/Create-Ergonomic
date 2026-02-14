@@ -2,7 +2,7 @@ package dev.dong.cerg.content;
 
 import com.simibubi.create.content.equipment.clipboard.ClipboardCloneable;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
-import com.simibubi.create.foundation.utility.Iterate;
+import net.createmod.catnip.data.Iterate;
 import dev.dong.cerg.CErg;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;

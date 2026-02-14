@@ -4,11 +4,11 @@ import com.google.common.base.Objects;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.AllSpecialTextures;
 import com.simibubi.create.CreateClient;
-import com.simibubi.create.foundation.utility.Components;
 import dev.dong.cerg.CErg;
 import dev.dong.cerg.CErgKeys;
 import dev.dong.cerg.CErgPackets;
 import dev.dong.cerg.util.LangUtil;
+import net.createmod.catnip.outliner.Outliner;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -51,8 +51,8 @@ public class ClipboardSelectionHandler {
         // 淡出高亮选区
         if (clusterCooldown > 0) {
             if (clusterCooldown == 25)
-                player.displayClientMessage(Components.immutableEmpty(), true);
-            CreateClient.OUTLINER.keep(clusterOutlineSlot);
+                player.displayClientMessage(Component.empty(), true);
+            Outliner.getInstance().keep(clusterOutlineSlot);
             clusterCooldown--;
         }
 
@@ -78,7 +78,7 @@ public class ClipboardSelectionHandler {
             LangUtil.translate("clipboard_selection.too_far")
                     .color(FAIL)
                     .sendStatus(player);
-            CreateClient.OUTLINER.keep(bbOutlineSlot);
+            Outliner.getInstance().keep(bbOutlineSlot);
             return;
         }
 
@@ -99,7 +99,7 @@ public class ClipboardSelectionHandler {
 
             AABB currentSelectionBox = getCurrentSelectionBox();
             if (currentSelectionBox != null)
-                CreateClient.OUTLINER.showAABB(bbOutlineSlot, currentSelectionBox)
+                Outliner.getInstance().showAABB(bbOutlineSlot, currentSelectionBox)
                         .colored(cancel ? FAIL : HIGHLIGHT)
                         .withFaceTextures(AllSpecialTextures.CUTOUT_CHECKERED, AllSpecialTextures.CUTOUT_CHECKERED)
                         .disableLineNormals()
@@ -166,7 +166,7 @@ public class ClipboardSelectionHandler {
         int countCCB = countCCBsWithSelection(firstPos, hoveredPos);
         CErg.LOGGER.info("count clipboard-cloneable block: {}", countCCB);
 
-        CreateClient.OUTLINER.showAABB(clusterOutlineSlot, currentSelectionBox)
+        Outliner.getInstance().showAABB(clusterOutlineSlot, currentSelectionBox)
                 .colored(0xB5F2C6)
                 .withFaceTextures(AllSpecialTextures.CUTOUT_CHECKERED, AllSpecialTextures.HIGHLIGHT_CHECKERED)
                 .disableLineNormals()

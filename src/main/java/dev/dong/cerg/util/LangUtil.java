@@ -1,9 +1,10 @@
 package dev.dong.cerg.util;
 
-import com.simibubi.create.foundation.utility.Lang;
-import com.simibubi.create.foundation.utility.LangBuilder;
-import com.simibubi.create.foundation.utility.LangNumberFormat;
+import com.simibubi.create.foundation.utility.CreateLang;
 import dev.dong.cerg.CErg;
+import net.createmod.catnip.lang.Lang;
+import net.createmod.catnip.lang.LangBuilder;
+import net.createmod.catnip.lang.LangNumberFormat;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Contract;
@@ -55,7 +56,7 @@ public class LangUtil extends Lang {
     }
 
     public static @NotNull LangBuilder seconds() {
-        return Lang.translate("generic.unit.seconds");
+        return CreateLang.translate("generic.unit.seconds");
     }
 
     public static @NotNull LangBuilder item(@NotNull ItemStack stack) {
