@@ -6,12 +6,8 @@ plugins {
 base.archivesName.set(p("mod_id"))
 group = p("mod_group_id")
 version = "${p("mc_version_slim")}-${p("create_version_slim")}-${p("mod_version")}-${p("loader_cap")}"
+java.toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-    }
-}
 // Jar 打包配置
 tasks.jar {
     from("LICENSE")
@@ -72,29 +68,25 @@ dependencies {
     runtimeOnly("io.github.llamalad7:mixinextras-${p("loader")}:${p("mixin_extras_version")}")
 }
 
-//publishMods {
-//    file.set(tasks.named("reobfJar").get().outputs.files.singleFile)
-//    changelog.set(file("CHANGELOG.md").readText())
-//    type.set(STABLE)
-//    version.set(project.version.toString())
-//    displayName.set("[${p("loader_cap")}] ${p("mod_version")} for Create ${p("mc_version")}-${p("create_main_version")}")
-//    modLoaders.addAll(p("loader_cap"), p("loader_other_cap"))
-//    modrinth {
-//        accessToken.set(providers.environmentVariable("MODRINTH_TOKEN"))
-//        projectId.set("")
-//        minecraftVersions.add(p("mc_version"))
-//        requires {
-//            id.set("")
-//            version.set("")
-//        }
-//        requires("cloth-config")
-//    }
+publishMods {
+    file.set(tasks.named("reobfJar").get().outputs.files.singleFile)
+    changelog.set(file("CHANGELOG.md").readText())
+    type.set(BETA)
+    version.set(p("mod_version"))
+    displayName.set("${p("mc_version_slim")}-${p("create_version_slim")}-${p("mod_version")}")
+    modLoaders.addAll(p("loader_cap"))
+    modrinth {
+        accessToken.set(providers.environmentVariable("MODRINTH_TOKEN_PUBLISH"))
+        projectId.set("l9kylKLD")
+        minecraftVersions.add(p("mc_version"))
+        requires("create", "cloth-config")
+    }
 //    curseforge {
 //        accessToken.set(providers.environmentVariable("CURSEFORGE_TOKEN"))
-//        projectId.set("")
+//        projectId.set("1233804")
 //        minecraftVersions.add(p("mc_version"))
 //        requires("create", "cloth-config")
 //    }
-//}
+}
 
 fun p(key: String) = property(key).toString()
