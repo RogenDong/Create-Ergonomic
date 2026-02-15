@@ -73,8 +73,8 @@ publishMods {
     file.set(tasks.named("reobfJar").get().outputs.files.singleFile)
     changelog.set(file("CHANGELOG.md").readText())
     type.set(BETA)
-    version.set("${p("mc_version_slim")}-${p("mod_version")}-${p("loader_cap")}")
-    displayName.set("${p("mod_version")} for ${p("mc_version")} Create ${p("create_version_slim")} [${p("loader_cap")}]")
+    version.set("${p("mod_version")}-${p("mc_version_slim")}-${p("create_version_slim")}-${p("loader_cap")}")
+    displayName.set("${p("mod_version")} for Create ${p("create_version_slim")} [${p("mc_version")} ${p("loader_cap")}]")
     modLoaders.addAll(p("loader_cap"))
     modrinth {
         accessToken.set(providers.environmentVariable("MODRINTH_TOKEN_PUBLISH"))
