@@ -2,54 +2,50 @@ package dev.dong.cerg;
 
 import dev.dong.cerg.content.ClipboardBatchPastePacket;
 import dev.dong.cerg.content.KeyPressStatePacket;
-import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkEvent.Context;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.createmod.catnip.net.base.BasePacketPayload;
+import net.createmod.catnip.net.base.CatnipPacketRegistry;
+import net.createmod.catnip.net.base.ServerboundPacketPayload;
+import net.createmod.catnip.platform.CatnipServices;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-import static net.minecraftforge.network.NetworkDirection.PLAY_TO_SERVER;
+import java.util.Locale;
 
-public class CErgPackets {
-    public static final ResourceLocation CHANNEL_NAME = CErg.asResource(CErg.ID);
+public enum CErgPackets implements BasePacketPayload.PacketTypeProvider {
+    KEY_PRESS_STATE(KeyPressStatePacket.class, KeyPressStatePacket.STREAM_CODEC),
+    CLIPBOARD_BATCH_PASTE(ClipboardBatchPastePacket.class, ClipboardBatchPastePacket.STREAM_CODEC)
+    ;
+
     public static final int NETWORK_VERSION = 3;
     public static final String NETWORK_VERSION_STR = String.valueOf(NETWORK_VERSION);
-    private static SimpleChannel channel;
+    private final CatnipPacketRegistry.PacketType<?> type;
 
-    public static void registerPackets() {
-        channel = NetworkRegistry.ChannelBuilder.named(CHANNEL_NAME)
-                .serverAcceptedVersions(NETWORK_VERSION_STR::equals)
-                .clientAcceptedVersions(NETWORK_VERSION_STR::equals)
-                .networkProtocolVersion(() -> NETWORK_VERSION_STR)
-                .simpleChannel();
-
-        // packets
-
-        channel.messageBuilder(KeyPressStatePacket.class, 0, PLAY_TO_SERVER)
-                .encoder(KeyPressStatePacket::write)
-                .decoder(KeyPressStatePacket::new)
-                .consumerNetworkThread((packet, contextSupplier) -> {
-                    Context context = contextSupplier.get();
-                    if (packet.handle(context)) context.setPacketHandled(true);
-                })
-                .add();
-        channel.messageBuilder(ClipboardBatchPastePacket.class, 1, PLAY_TO_SERVER)
-                .encoder(ClipboardBatchPastePacket::write)
-                .decoder(ClipboardBatchPastePacket::new)
-                .consumerNetworkThread((packet, contextSupplier) -> {
-                    Context context = contextSupplier.get();
-                    if (packet.handle(context)) context.setPacketHandled(true);
-                })
-                .add();
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends CustomPacketPayload> CustomPacketPayload.Type<T> getType() {
+        return (CustomPacketPayload.Type<T>) this.type.type();
     }
 
-    public static SimpleChannel getChannel() {
-        return channel;
+    <T extends BasePacketPayload> CErgPackets(Class<T> clazz, StreamCodec<? super RegistryFriendlyByteBuf, T> codec) {
+        String name = this.name().toLowerCase(Locale.ROOT);
+        this.type = new CatnipPacketRegistry.PacketType<>(
+                new CustomPacketPayload.Type<>(CErg.asResource(name)), clazz, codec);
     }
 
-    public static <MSG> void sendToServer(MSG packet) {
-        var c1 = Minecraft.getInstance().getConnection();
-        if (c1 != null) channel.sendToServer(packet);
+    public static void register() {
+        CatnipPacketRegistry packetRegistry = new CatnipPacketRegistry(CErg.ID, NETWORK_VERSION_STR);
+        for (CErgPackets packet : CErgPackets.values()) {
+            packetRegistry.registerPacket(packet.type);
+        }
+        packetRegistry.registerAllPackets();
     }
 
+    public static void sendToServer(ServerboundPacketPayload packet) {
+        try {
+            CatnipServices.NETWORK.sendToServer(packet);
+        } catch (Exception e) {
+            CErg.LOGGER.error("Failed to send packet to client", e);
+        }
+    }
 }
