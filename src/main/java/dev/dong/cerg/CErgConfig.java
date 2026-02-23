@@ -7,10 +7,11 @@ import me.shedaniel.autoconfig.annotation.ConfigEntry.BoundedDiscrete;
 import me.shedaniel.autoconfig.annotation.ConfigEntry.Category;
 import me.shedaniel.autoconfig.annotation.ConfigEntry.Gui.Tooltip;
 import me.shedaniel.autoconfig.annotation.ConfigEntry.Gui.TransitiveObject;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.ConfigScreenHandler;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import org.jetbrains.annotations.NotNull;
 
 @Config(name = CErg.ID)
 public class CErgConfig implements ConfigData {
@@ -28,10 +29,10 @@ public class CErgConfig implements ConfigData {
     @TransitiveObject
     public final FiniteChain finiteChain = new FiniteChain();
 
-    public void register() {
+    public void register(@NotNull ModContainer container) {
         if (FMLEnvironment.dist != Dist.CLIENT) return;
-        var factory = new ConfigScreenHandler.ConfigScreenFactory((mc, screen) -> AutoConfig.getConfigScreen(CErgConfig.class, screen).get());
-        ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> factory);
+        IConfigScreenFactory factory = (modContainer, screen) -> AutoConfig.getConfigScreen(CErgConfig.class, screen).get();
+        container.registerExtensionPoint(IConfigScreenFactory.class, factory);
     }
 
     public static class General {

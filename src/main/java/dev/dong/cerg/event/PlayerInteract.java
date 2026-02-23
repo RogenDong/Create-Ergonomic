@@ -17,8 +17,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 
 import static dev.dong.cerg.CErgKeys.CHAIN_ENCASE;
 import static dev.dong.cerg.content.PlayerKeyStates.isKeyPressed;
@@ -58,7 +58,7 @@ public class PlayerInteract {
      *   <li>左右手各触发一次</li>
      * </ul>
      */
-    public static void rightClick(PlayerInteractEvent.RightClickBlock event) {
+    public static void rightClick(RightClickBlock event) {
         Level level = event.getLevel();
         if (level.isClientSide) return;
 

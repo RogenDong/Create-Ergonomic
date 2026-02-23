@@ -5,19 +5,19 @@ import dev.dong.cerg.CErgKeys;
 import dev.dong.cerg.CErgPackets;
 import dev.dong.cerg.content.KeyPressStatePacket;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.TickEvent.ClientTickEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientEvents {
     private static int preSyncTick = 0;
 
-    public static void onTick(ClientTickEvent event) {
+    public static void onTick(PlayerTickEvent event) {
         // 监听【连锁套壳】按键状态，同步到服务端
         if (++preSyncTick >= 4) {
             preSyncTick = 0;
-            CErgPackets.sendToServer(new KeyPressStatePacket(CErgKeys.CHAIN_ENCASE, CErgKeys.CHAIN_ENCASE.isDown()));
+            CErgPackets.sendToServer(new KeyPressStatePacket(CErgKeys.CHAIN_ENCASE));
         }
 
         var mc = Minecraft.getInstance();
