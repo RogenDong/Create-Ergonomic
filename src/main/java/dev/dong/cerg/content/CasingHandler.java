@@ -3,15 +3,17 @@ package dev.dong.cerg.content;
 import com.simibubi.create.content.decoration.encasing.EncasableBlock;
 import com.simibubi.create.content.decoration.encasing.EncasedBlock;
 import com.simibubi.create.content.decoration.encasing.EncasingRegistry;
+import com.simibubi.create.content.fluids.pipes.AxisPipeBlock;
 import com.simibubi.create.content.fluids.pipes.EncasedPipeBlock;
 import com.simibubi.create.content.fluids.pipes.FluidPipeBlock;
-import com.simibubi.create.content.fluids.pipes.GlassFluidPipeBlock;
 import com.simibubi.create.content.kinetics.base.RotatedPillarKineticBlock;
 import com.simibubi.create.content.kinetics.belt.BeltBlock;
 import com.simibubi.create.content.kinetics.belt.BeltBlockEntity;
 import com.simibubi.create.content.kinetics.belt.BeltHelper;
 import dev.dong.cerg.CErg;
 import dev.dong.cerg.CErgConfig;
+import dev.dong.cerg.mixin.encasing.AxisPipeBlockAccessor;
+import dev.dong.cerg.mixin.encasing.FluidPipeBlockAccessor;
 import dev.dong.cerg.util.S2E;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction.Axis;
@@ -25,18 +27,13 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import static com.simibubi.create.AllBlocks.ENCASED_FLUID_PIPE;
-import static com.simibubi.create.AllBlocks.GLASS_FLUID_PIPE;
-import static com.simibubi.create.AllBlocks.FLUID_PIPE;
-import static com.simibubi.create.AllBlocks.ANDESITE_CASING;
-import static com.simibubi.create.AllBlocks.COPPER_CASING;
-import static com.simibubi.create.AllBlocks.BRASS_CASING;
+import static com.simibubi.create.AllBlocks.*;
 import static com.simibubi.create.content.kinetics.base.RotatedPillarKineticBlock.AXIS;
 import static com.simibubi.create.content.kinetics.belt.BeltBlockEntity.CasingType.ANDESITE;
 import static com.simibubi.create.content.kinetics.belt.BeltBlockEntity.CasingType.BRASS;
@@ -127,6 +124,7 @@ public class CasingHandler {
         Set<BlockPos> connected = PipeHandler.getConnectedPipe(level, event.getPos());
         if (connected.isEmpty()) return;
 
+        var held = event.getItemStack();
         var hitVec = event.getHitVec();
         var player = event.getEntity();
         var hand = event.getHand();
@@ -139,10 +137,10 @@ public class CasingHandler {
             BlockHitResult ray = hitVec.withPosition(pos);
             Block pipe = state.getBlock();
             // 玻璃管道
-            if (pipe instanceof GlassFluidPipeBlock gfp)
-                gfp.use(state, level, pos, player, hand, ray);
+            if (pipe instanceof AxisPipeBlock gfp)
+                ((AxisPipeBlockAccessor) gfp).useItemOn(held, state, level, pos, player, hand, ray);
             else if (pipe instanceof FluidPipeBlock fp)
-                fp.use(state, level, pos, player, hand, ray);
+                ((FluidPipeBlockAccessor) fp).useItemOn(held, state, level, pos, player, hand, ray);
         }
     }
 
