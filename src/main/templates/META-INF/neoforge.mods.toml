@@ -1,40 +1,37 @@
 modLoader="javafml"
 loaderVersion="0"
 license="${mod_license}"
+issueTrackerURL = "${mod_issue_url}"
 
 [[mods]]
 modId="create_ergonomic"
 version="${mod_version}"
-displayName="Create: Ergonomic"
-authors="dong"
-description='''An addon that optimizes tedious manual operations in Create'''
+displayName="${mod_name}"
+authors="${mod_authors}"
+description='''${mod_description}'''
 logoFile = "icon.png"
 logoBlur = false
 
 [[dependencies.create_ergonomic]]
-modId = "forge"
-mandatory = true
-versionRange = "0"
+modId = "neoforge"
+type = "required"
 ordering = "NONE"
 side="BOTH"
 
 [[dependencies.create_ergonomic]]
 modId = "minecraft"
-mandatory = true
-versionRange = "0"
+type = "required"
 ordering = "NONE"
 side="BOTH"
 
 [[dependencies.create_ergonomic]]
 modId = "create"
-mandatory = true
-versionRange = "[6.0.0,)"
+type = "required"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.create_ergonomic]]
 modId = "cloth_config"
-mandatory = true
-versionRange = "0"
+type = "required"
 ordering = "NONE"
 side = "BOTH"
