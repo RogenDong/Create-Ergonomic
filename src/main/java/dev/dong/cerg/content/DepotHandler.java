@@ -6,7 +6,7 @@ import dev.dong.cerg.mixin.tools.DepotBehaviourAccessor;
 import dev.dong.cerg.util.LangUtil;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 
 /**
  * 置物台行为相关
@@ -24,7 +24,7 @@ public class DepotHandler {
     /**
      * 切换普通置物台的合并功能
      */
-    public static void switchDepotMerge(PlayerInteractEvent.RightClickBlock event) {
+    public static void switchDepotMerge(RightClickBlock event) {
         var now = System.currentTimeMillis();
         if (now - lastSwitchDepotMergeTime < SWITCH_DEPOT_MERGE_DELAY) return;
 
