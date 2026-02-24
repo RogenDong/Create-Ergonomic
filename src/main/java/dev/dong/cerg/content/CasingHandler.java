@@ -138,9 +138,9 @@ public class CasingHandler {
             Block pipe = state.getBlock();
             // 玻璃管道
             if (pipe instanceof AxisPipeBlock gfp)
-                ((AxisPipeBlockAccessor) gfp).useItemOn(held, state, level, pos, player, hand, ray);
+                ((AxisPipeBlockAccessor) gfp).cerg_useItemOn(held, state, level, pos, player, hand, ray);
             else if (pipe instanceof FluidPipeBlock fp)
-                ((FluidPipeBlockAccessor) fp).useItemOn(held, state, level, pos, player, hand, ray);
+                ((FluidPipeBlockAccessor) fp).cerg_useItemOn(held, state, level, pos, player, hand, ray);
         }
     }
 
