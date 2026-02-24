@@ -15,5 +15,5 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(FluidPipeBlock.class)
 public interface FluidPipeBlockAccessor {
     @Invoker("useItemOn")
-    ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult);
+    ItemInteractionResult cerg_useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult);
 }

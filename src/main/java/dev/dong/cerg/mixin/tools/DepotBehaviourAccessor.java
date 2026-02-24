@@ -4,8 +4,8 @@ import com.simibubi.create.content.logistics.depot.DepotBehaviour;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(value = DepotBehaviour.class, remap = false)
+@Mixin(DepotBehaviour.class)
 public interface DepotBehaviourAccessor {
-    @Accessor
-    void setAllowMerge(boolean value);
+    @Accessor("allowMerge")
+    void cerg_setAllowMerge(boolean value);
 }

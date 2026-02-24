@@ -1,9 +1,11 @@
 {
   "required": false,
-  "minVersion": "0",
+  "minVersion": "0.8",
   "package": "dev.dong.cerg.mixin",
-  "refmap": "create_ergonomic.refmap.json",
+  "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "encasing.FluidPipeBlockAccessor",
+    "encasing.AxisPipeBlockAccessor",
     "tools.DepotBehaviourAccessor",
     "tools.DepotBehaviourMixin"
   ]

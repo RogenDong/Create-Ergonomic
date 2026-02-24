@@ -12,6 +12,9 @@ description='''${mod_description}'''
 logoFile = "icon.png"
 logoBlur = false
 
+[[mixins]]
+config = "create_ergonomic.mixins.json"
+
 [[dependencies.create_ergonomic]]
 modId = "neoforge"
 type = "required"
