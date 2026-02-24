@@ -1,7 +1,6 @@
 package dev.dong.cerg.content;
 
 import com.google.common.base.Objects;
-import com.simibubi.create.AllDataComponents;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.AllSpecialTextures;
 import dev.dong.cerg.CErg;
@@ -12,17 +11,14 @@ import net.createmod.catnip.outliner.Outliner;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.HitResult.Type;
-
-import java.util.Optional;
+import net.minecraft.world.phys.Vec3;
 
 import static com.simibubi.create.AllBlocks.CLIPBOARD;
 
@@ -116,7 +112,9 @@ public class ClipboardSelectionHandler {
 
     private AABB getCurrentSelectionBox() {
         if (firstPos == null || hoveredPos == null) return null;
-        return new AABB(firstPos.getCenter(), hoveredPos.getCenter()).expandTowards(1, 1, 1);
+        var a = new Vec3(firstPos.getX(), firstPos.getY(), firstPos.getZ());
+        var b = new Vec3(hoveredPos.getX(), hoveredPos.getY(), hoveredPos.getZ());
+        return new AABB(a, b).expandTowards(1, 1, 1);
     }
 
     public void onMouseInput(boolean isAtk) {
