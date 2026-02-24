@@ -1,9 +1,9 @@
 package dev.dong.cerg.content;
 
 import com.google.common.base.Objects;
+import com.simibubi.create.AllDataComponents;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.AllSpecialTextures;
-import com.simibubi.create.CreateClient;
 import dev.dong.cerg.CErg;
 import dev.dong.cerg.CErgKeys;
 import dev.dong.cerg.CErgPackets;
@@ -12,13 +12,17 @@ import net.createmod.catnip.outliner.Outliner;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.HitResult.Type;
+
+import java.util.Optional;
 
 import static com.simibubi.create.AllBlocks.CLIPBOARD;
 
@@ -57,8 +61,8 @@ public class ClipboardSelectionHandler {
         }
 
         // 剪贴板需要保持复制的配置
-        var copied = player.getMainHandItem().getTagElement("CopiedValues");
-        if (firstPos != null && copied == null) {
+        var copied = ClipboardSelectionHelper.getCopiedData(player.getMainHandItem());
+        if (firstPos != null && copied.isEmpty()) {
             discard();
             return;
         }
@@ -111,19 +115,19 @@ public class ClipboardSelectionHandler {
     }
 
     private AABB getCurrentSelectionBox() {
-        return firstPos == null || hoveredPos == null
-                ? null
-                : new AABB(firstPos, hoveredPos).expandTowards(1, 1, 1);
+        if (firstPos == null || hoveredPos == null) return null;
+        return new AABB(firstPos.getCenter(), hoveredPos.getCenter()).expandTowards(1, 1, 1);
     }
 
     public void onMouseInput(boolean isAtk) {
         var mc = Minecraft.getInstance();
         var player = mc.player;
         var level = mc.level;
+        var held = player.getMainHandItem();
 
         if (!player.mayBuild()) return;
-        if (!CLIPBOARD.isIn(player.getMainHandItem())) return;
-        if (player.getMainHandItem().getTagElement("CopiedValues") == null) {
+        if (!CLIPBOARD.isIn(held)) return;
+        if (ClipboardSelectionHelper.getCopiedData(held).isEmpty()) {
             LangUtil.translate("clipboard_selection.have_not_copied")
                     .color(HIGHLIGHT)
                     .sendStatus(player);
@@ -188,8 +192,9 @@ public class ClipboardSelectionHandler {
         if (firstPos == null || secondPos == null) return 0;
 
         var mc = Minecraft.getInstance();
-        var copied = mc.player.getMainHandItem().getTagElement("CopiedValues");
-        if (copied == null) return 0;
+        var copied = ClipboardSelectionHelper.getCopiedData(mc.player.getMainHandItem());
+        if (copied.isEmpty()) return 0;
+        var values = copied.get();
 
         var minX = Math.min(firstPos.getX(), secondPos.getX());
         var minY = Math.min(firstPos.getY(), secondPos.getY());
@@ -205,7 +210,7 @@ public class ClipboardSelectionHandler {
                     var offset = new BlockPos(x, y, z);
                     var state = mc.level.getBlockState(offset);
                     if (!state.isAir() && ClipboardSelectionHelper.tryPaste(
-                            mc.level, mc.player, offset, copied, true))
+                            mc.level, mc.player, offset, values, true))
                         count++;
                 }
             }
