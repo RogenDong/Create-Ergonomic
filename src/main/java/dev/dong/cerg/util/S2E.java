@@ -49,9 +49,9 @@ public class S2E {
     }
 
     public Pair<Direction, Direction> getDirection() {
-        if (this.a[0] > 0) return Pair.of(Direction.EAST, Direction.WEST);
-        if (this.a[1] > 0) return Pair.of(Direction.UP, Direction.DOWN);
-        if (this.a[2] > 0) return Pair.of(Direction.SOUTH, Direction.NORTH);
+        if (this.a[0] > 0 || this.a[3] > 0) return Pair.of(Direction.EAST, Direction.WEST);
+        if (this.a[1] > 0 || this.a[4] > 0) return Pair.of(Direction.UP, Direction.DOWN);
+        if (this.a[2] > 0 || this.a[5] > 0) return Pair.of(Direction.SOUTH, Direction.NORTH);
         return null;
     }
 
