@@ -6,6 +6,7 @@ import net.createmod.catnip.net.base.BasePacketPayload;
 import net.createmod.catnip.net.base.CatnipPacketRegistry;
 import net.createmod.catnip.net.base.ServerboundPacketPayload;
 import net.createmod.catnip.platform.CatnipServices;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -42,10 +43,7 @@ public enum CErgPackets implements BasePacketPayload.PacketTypeProvider {
     }
 
     public static void sendToServer(ServerboundPacketPayload packet) {
-        try {
-            CatnipServices.NETWORK.sendToServer(packet);
-        } catch (Exception e) {
-            CErg.LOGGER.error("Failed to send packet to client", e);
-        }
+        var mc = Minecraft.getInstance().getConnection();
+        if (mc != null) CatnipServices.NETWORK.sendToServer(packet);
     }
 }
