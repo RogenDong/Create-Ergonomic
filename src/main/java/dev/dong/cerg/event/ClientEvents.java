@@ -13,7 +13,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 public class ClientEvents {
     private static int preSyncTick = 0;
 
-    public static void onTick(PlayerTickEvent event) {
+    public static void onTick(PlayerTickEvent.Pre event) {
         // 监听【连锁套壳】按键状态，同步到服务端
         if (++preSyncTick >= 4) {
             preSyncTick = 0;
