@@ -38,7 +38,7 @@ public class DepotHandler {
         lastSwitchDepotMergeTime = now;
         var player = event.getEntity();
 
-        if (behaviour.canMergeItems()) ((DepotBehaviourAccessor) behaviour).setAllowMerge(false);
+        if (behaviour.canMergeItems()) ((DepotBehaviourAccessor) behaviour).cerg_setAllowMerge(false);
         else behaviour.enableMerging();
 
         var turnOn = behaviour.canMergeItems();
