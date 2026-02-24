@@ -1,1 +1,1 @@
-兼容 | Compatible with 1.20.1 Create 6.0.6 Forge
+兼容 | Compatible with 1.21.1 Create 6.0.9 NeoForge
