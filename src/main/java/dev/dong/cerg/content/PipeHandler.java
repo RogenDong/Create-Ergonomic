@@ -67,12 +67,12 @@ public class PipeHandler {
         FluidTransportBehaviour pipe = FluidPropagator.getPipe(world, pos);
         if (pipe == null) return false;
 
+        // 遇到[非轴向管道 or 套壳管道]: 若沿指定方向连接, 则跳过节点继续遍历; 反之则停止
         if (!ENCASED_FLUID_PIPE.has(bs) && FluidPropagator.getStraightPipeAxis(bs) == axis) {
             axialPipes.add(pos);
             return true;
         }
 
-        // 遇到[非轴向管道 or 套壳管道]: 若沿指定方向连接, 则跳过节点继续遍历; 反之则停止
         return pipe.canHaveFlowToward(bs, dir);
     }
 
